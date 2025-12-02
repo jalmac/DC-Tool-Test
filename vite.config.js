@@ -5,6 +5,7 @@ export default defineConfig({
   plugins: [react()],
   server: {
     port: 5173,
-    allowedHosts: ["*"],   // <-- FIX: allow Codesandbox preview hostnames
+    allowedHosts: ["*"],   // <-- allow all Codesandbox hosts
+    host: true,            // <-- required for CSB remote preview
   },
 });
