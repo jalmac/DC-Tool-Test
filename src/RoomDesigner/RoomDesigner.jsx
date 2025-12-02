@@ -854,8 +854,5 @@ export default function RoomDesigner() {
     </div>
   );
 }
-      </div>
-    </div>
-  );
-}
+
 
