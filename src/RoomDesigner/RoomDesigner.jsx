@@ -1,11 +1,4 @@
-// RoomDesigner.jsx — FINAL VERSION (CHUNK 1/6)
-// Complete interactive datacenter room layout tool with:
-// - Polygon editor (edit mode + reset)
-// - Door dragging (continuous, polygon-edge aware)
-// - AC palette drag/drop + snapping
-// - Rack auto-pack + snap-to-grid + cable manager visualization
-// - Light theme Amgen UI
-// - Export PNG/JPG/PDF
+// RoomDesigner.jsx — FINAL, CLEAN, COMPLETE VERSION
 
 import React, { useState, useRef, useEffect } from "react";
 import { Stage, Layer, Line, Rect, Text, Group, Circle } from "react-konva";
@@ -38,11 +31,9 @@ import {
 import { ControlsPanel } from "./ui.jsx";
 import RackAssetPalette from "./RackAssetPalette.jsx";
 
-// Preview canvas bounding box
 const PREVIEW_W = 900;
 const PREVIEW_H = 500;
 
-// Unit conversion (feet ↔ meters)
 const UNIT_SCALES = {
   feet: 15,
   meters: 50,
@@ -60,15 +51,12 @@ function clampRoom(v) {
 export default function RoomDesigner() {
   const stageRef = useRef(null);
 
-  /* -----------------------------------------------------------
-   *  CORE STATE
-   * --------------------------------------------------------- */
+  // ------------------ CORE STATE ------------------
 
   const [unit, setUnit] = useState("feet");
   const [roomWidth, setRoomWidth] = useState(40);
   const [roomLength, setRoomLength] = useState(25);
 
-  // Polygon (editable room shape)
   const [polygon, setPolygon] = useState(
     scalePolygon(
       [
@@ -84,11 +72,9 @@ export default function RoomDesigner() {
 
   const [editPolygon, setEditPolygon] = useState(false);
 
-  // Door (side + continuous offset)
   const [doorSide, setDoorSide] = useState("top");
   const [doorOffset, setDoorOffset] = useState(50);
 
-  // Racks
   const [numRacks, setNumRacks] = useState(4);
   const [numRows, setNumRows] = useState(1);
   const [rackWidthPhysical, setRackWidthPhysical] = useState(2);
@@ -98,14 +84,12 @@ export default function RoomDesigner() {
   const [snapToRacks, setSnapToRacks] = useState(true);
   const [racks, setRacks] = useState([]);
 
-  // AC units
   const [acUnits, setAcUnits] = useState([]);
   const [selectedAC, setSelectedAC] = useState(null);
 
   const [exporting, setExporting] = useState(false);
-  /* -----------------------------------------------------------
-   *  DERIVED GEOMETRY
-   * --------------------------------------------------------- */
+
+  // ------------------ DERIVED GEOMETRY ------------------
 
   const scale = UNIT_SCALES[unit];
   const roomW = clampRoom(roomWidth) * scale;
@@ -115,19 +99,18 @@ export default function RoomDesigner() {
   const rackD = rackDepthPhysical * scale;
   const cableManagerPx = cableManagerWidth * scale;
 
-  // Fit to preview canvas
   const scaleToFit = Math.min(PREVIEW_W / roomW, PREVIEW_H / roomH, 1);
 
   const offsetX = (PREVIEW_W - roomW * scaleToFit) / 2;
   const offsetY = (PREVIEW_H - roomH * scaleToFit) / 2;
 
-  // Door physical dimensions
   const door = {
     width: 3 * scale,
     leaf: 3 * scale,
   };
 
-  // Rack validation wrappers
+  // ------------------ HELPERS ------------------
+
   const rackInsidePoly = (x, y, w, h, poly) =>
     boxInsidePolygon(x, y, w, h, poly);
 
@@ -156,17 +139,13 @@ export default function RoomDesigner() {
       doorOffsetArg
     );
 
-  /* -----------------------------------------------------------
-   *  EFFECT: SCALE POLYGON when room dimensions change
-   * --------------------------------------------------------- */
+  // ------------------ EFFECT: SCALE POLYGON ------------------
 
   useEffect(() => {
     setPolygon((prev) => scalePolygon(prev, roomW, roomH));
   }, [roomW, roomH]);
 
-  /* -----------------------------------------------------------
-   *  EFFECT: AUTO-PACK RACKS
-   * --------------------------------------------------------- */
+  // ------------------ EFFECT: AUTO-PACK RACKS ------------------
 
   useEffect(() => {
     const packed = autoPackRacks(
@@ -201,9 +180,7 @@ export default function RoomDesigner() {
     doorOffset,
   ]);
 
-  /* -----------------------------------------------------------
-   *  AC ADD (drag from palette → drop)
-   * --------------------------------------------------------- */
+  // ------------------ AC UNIT ADD ------------------
 
   function addACCanvasCoords(canvasX, canvasY) {
     const px = (canvasX - offsetX) / scaleToFit;
@@ -212,10 +189,8 @@ export default function RoomDesigner() {
     const widthPx = 3 * scale;
     const heightPx = 1 * scale;
 
-    // Polygon-aware snapping (best edge + t)
     const best = snapPointToPolygonEdges(px, py, widthPx, heightPx, polygon);
 
-    // Determine side based on edge orientation + projected point
     const p1 = polygon[best.edgeIdx];
     const p2 = polygon[(best.edgeIdx + 1) % polygon.length];
     const dx = p2[0] - p1[0];
@@ -236,7 +211,6 @@ export default function RoomDesigner() {
       height: heightPx,
     };
 
-    // Try place → fallback if needed
     const after = resolveACDrag(
       [],
       provisional,
@@ -254,9 +228,7 @@ export default function RoomDesigner() {
     setSelectedAC(finalAC.id);
   }
 
-  /* -----------------------------------------------------------
-   *  AC DRAG END
-   * --------------------------------------------------------- */
+  // ------------------ AC DRAG END ------------------
 
   function onACDragEnd(ac, canvasX, canvasY) {
     const px = (canvasX - offsetX) / scaleToFit;
@@ -293,6 +265,8 @@ export default function RoomDesigner() {
     setAcUnits(updated);
   }
 
+  // ------------------ DELETE / RESIZE AC ------------------
+
   function deleteAC(id) {
     setAcUnits((prev) => prev.filter((a) => a.id !== id));
     if (selectedAC === id) setSelectedAC(null);
@@ -303,15 +277,13 @@ export default function RoomDesigner() {
       resizeAC(prev, id, wPhysical * scale, hPhysical * scale)
     );
   }
-  /* -----------------------------------------------------------
-   *  RACK DRAG END
-   * --------------------------------------------------------- */
+
+  // ------------------ RACK DRAG END ------------------
 
   function onRackDragEnd(index, canvasX, canvasY) {
     let x = (canvasX - offsetX) / scaleToFit;
     let y = (canvasY - offsetY) / scaleToFit;
 
-    // Snap-to-grid (restores old tool behavior)
     if (snapToRacks && racks.length > 0) {
       const snapped = snapRackToGrid(
         index,
@@ -327,7 +299,6 @@ export default function RoomDesigner() {
       y = snapped.y;
     }
 
-    // Validate final rack position
     const valid = rackPositionIsValid(
       x,
       y,
@@ -370,9 +341,7 @@ export default function RoomDesigner() {
     setRacks(packed);
   }
 
-  /* -----------------------------------------------------------
-   *  DOOR DRAG END (continuous, polygon-edge aware)
-   * --------------------------------------------------------- */
+  // ------------------ DOOR DRAG END ------------------
 
   function handleDoorDragEnd(e) {
     const canvasX = e.target.x();
@@ -381,15 +350,15 @@ export default function RoomDesigner() {
     const ax = (canvasX - offsetX) / scaleToFit;
     const ay = (canvasY - offsetY) / scaleToFit;
 
-    let best = { dist: 1e12, idx: 0, t: 0, ex: 0, ey: 0 };
+    let best = { dist: 1e12, idx: 0, t: 0 };
 
     polygon.forEach((p1, i) => {
       const p2 = polygon[(i + 1) % polygon.length];
       const vx = p2[0] - p1[0];
       const vy = p2[1] - p1[1];
-      const len2 = vx * vx + vy * vy || 1;
+      const len2 = Math.max(vx * vx + vy * vy, 1);
 
-      const proj = ((ax - p1[0]) * vx + (ay - p1[1]) * vy) / len2;
+      const proj = ((ax - p1[0]) * vx + (ay - p1[1])) / len2;
       const t = Math.max(0, Math.min(1, proj));
       const ex = p1[0] + vx * t;
       const ey = p1[1] + vy * t;
@@ -400,7 +369,6 @@ export default function RoomDesigner() {
 
     const p1 = polygon[best.idx];
     const p2 = polygon[(best.idx + 1) % polygon.length];
-
     const dx = p2[0] - p1[0];
     const dy = p2[1] - p1[1];
 
@@ -415,9 +383,7 @@ export default function RoomDesigner() {
     setDoorOffset(best.t * 100);
   }
 
-  /* -----------------------------------------------------------
-   *  POLYGON EDIT HANDLERS
-   * --------------------------------------------------------- */
+  // ------------------ POLYGON EDIT ------------------
 
   function handleVertexDragMove(index, e) {
     const canvasX = e.target.x();
@@ -425,10 +391,7 @@ export default function RoomDesigner() {
     const x = (canvasX - offsetX) / scaleToFit;
     const y = (canvasY - offsetY) / scaleToFit;
 
-    // Move vertex
     setPolygon((prev) => movePolygonPoint(prev, index, x, y, roomW, roomH));
-
-    // Repack racks after wall move
     resetRacks();
   }
 
@@ -443,23 +406,16 @@ export default function RoomDesigner() {
   }
 
   function handleResetPolygon() {
-    setPolygon(
-      scalePolygon(
-        [
-          [0, 0],
-          [roomW, 0],
-          [roomW, roomH],
-          [0, roomH],
-        ],
-        roomW,
-        roomH
-      )
-    );
+    setPolygon([
+      [0, 0],
+      [roomW, 0],
+      [roomW, roomH],
+      [0, roomH],
+    ]);
     resetRacks();
   }
-  /* -----------------------------------------------------------
-   *  EXPORTS
-   * --------------------------------------------------------- */
+
+  // ------------------ EXPORT ------------------
 
   function exportPNG() {
     if (!stageRef.current) return;
@@ -507,9 +463,7 @@ export default function RoomDesigner() {
     }, 20);
   }
 
-  /* -----------------------------------------------------------
-   *  RENDER
-   * --------------------------------------------------------- */
+  // ------------------ RENDER ------------------
 
   return (
     <div style={{ display: "flex", gap: 24 }}>
@@ -529,8 +483,8 @@ export default function RoomDesigner() {
           setNumRows={setNumRows}
           rackWidth={rackWidthPhysical}
           rackDepth={rackDepthPhysical}
-          setRackDepth={setRackDepthPhysical}
           setRackWidth={setRackWidthPhysical}
+          setRackDepth={setRackDepthPhysical}
           showCableManagers={showCableManagers}
           setShowCableManagers={setShowCableManagers}
           cableManagerWidth={cableManagerWidth}
@@ -553,9 +507,9 @@ export default function RoomDesigner() {
         />
       </div>
 
-      {/* RIGHT COLUMN (Canvas + Controls) */}
+      {/* RIGHT SIDE (Canvas + tools) */}
       <div style={{ flex: 1 }}>
-        {/* Polygon / Room tools bar */}
+        {/* Polygon edit toolbar */}
         <div
           style={{
             display: "flex",
@@ -594,6 +548,54 @@ export default function RoomDesigner() {
             Reset Polygon
           </button>
         </div>
+
+        {/* CANVAS BOX */}
+        <div
+          style={{
+            borderRadius: 12,
+            background: "#ffffff",
+            border: "1px solid #d5e1ef",
+            boxShadow: "0 4px 10px rgba(0,0,0,0.06)",
+            padding: 16,
+            width: PREVIEW_W,
+            height: PREVIEW_H,
+          }}
+          onDragOver={(e) => e.preventDefault()}
+          onDrop={(e) => {
+            e.preventDefault();
+            const type = e.dataTransfer.getData("asset-type");
+            if (type === "ACUnit") {
+              const rect = e.currentTarget.getBoundingClientRect();
+              addACCanvasCoords(
+                e.clientX - rect.left,
+                e.clientY - rect.top
+              );
+            }
+          }}
+        >
+          <Stage
+            width={PREVIEW_W}
+            height={PREVIEW_H}
+            ref={stageRef}
+            onMouseDown={(e) => {
+              if (e.target === e.target.getStage()) {
+                setSelectedAC(null);
+              }
+            }}
+          >
+            <Layer>
+              {/* ROOM POLYGON */}
+              <Line
+                points={polygon.flatMap(([x, y]) => [
+                  x * scaleToFit + offsetX,
+                  y * scaleToFit + offsetY,
+                ])}
+                closed
+                stroke="#1976d2"
+                strokeWidth={2}
+                fill="#f4f8ff"
+              />
+
               {/* DOOR */}
               {(() => {
                 const g = computeDoorGeometry(
@@ -606,14 +608,11 @@ export default function RoomDesigner() {
                 );
                 if (!g) return null;
 
-                const ax =
-                  g.anchor[0] * scaleToFit + offsetX;
-                const ay =
-                  g.anchor[1] * scaleToFit + offsetY;
+                const ax = g.anchor[0] * scaleToFit + offsetX;
+                const ay = g.anchor[1] * scaleToFit + offsetY;
 
                 return (
                   <>
-                    {/* Door gap */}
                     <Line
                       points={[
                         g.gapStart[0] * scaleToFit + offsetX,
@@ -625,7 +624,6 @@ export default function RoomDesigner() {
                       strokeWidth={6}
                     />
 
-                    {/* Door leaf */}
                     <Line
                       points={[
                         g.leaf[0] * scaleToFit + offsetX,
@@ -637,7 +635,6 @@ export default function RoomDesigner() {
                       strokeWidth={3}
                     />
 
-                    {/* Door Anchor */}
                     <Circle
                       x={ax}
                       y={ay}
@@ -654,10 +651,8 @@ export default function RoomDesigner() {
 
               {/* RACKS */}
               {racks.map((rk, i) => {
-                const x =
-                  rk.x * scaleToFit + offsetX;
-                const y =
-                  rk.y * scaleToFit + offsetY;
+                const x = rk.x * scaleToFit + offsetX;
+                const y = rk.y * scaleToFit + offsetY;
 
                 return (
                   <Group
@@ -666,17 +661,13 @@ export default function RoomDesigner() {
                     y={y}
                     draggable={!exporting}
                     onDragEnd={(e) =>
-                      onRackDragEnd(
-                        i,
-                        e.target.x(),
-                        e.target.y()
-                      )
+                      onRackDragEnd(i, e.target.x(), e.target.y())
                     }
                   >
                     <Rect
                       width={rackW * scaleToFit}
                       height={rackD * scaleToFit}
-                      fill="#e8f1fb"        // Light Amgen-blue
+                      fill="#e8f1fb"
                       stroke="#1976d2"
                       strokeWidth={2}
                       cornerRadius={6}
@@ -696,28 +687,20 @@ export default function RoomDesigner() {
 
               {/* CABLE MANAGERS */}
               {showCableManagers &&
-                racks.map((rk, i) => {
-                  if (i === racks.length - 1) return null;
-
+                racks.slice(0, -1).map((rk, i) => {
                   const cmX =
                     (rk.x + rackW) * scaleToFit +
                     offsetX +
                     (cableManagerPx * scaleToFit) / 2;
-
-                  const cmY =
-                    rk.y * scaleToFit + offsetY;
+                  const cmY = rk.y * scaleToFit + offsetY;
 
                   return (
                     <Rect
                       key={`cm-${i}`}
                       x={cmX}
                       y={cmY}
-                      width={
-                        cableManagerPx * scaleToFit
-                      }
-                      height={
-                        rackD * scaleToFit
-                      }
+                      width={cableManagerPx * scaleToFit}
+                      height={rackD * scaleToFit}
                       fill="#d2e8ff"
                       stroke="#1976d2"
                       strokeWidth={1}
@@ -728,13 +711,9 @@ export default function RoomDesigner() {
 
               {/* AC UNITS */}
               {acUnits.map((ac) => {
-                const [ax, ay] =
-                  getACPixelPosition(ac, roomW, roomH);
-
-                const sx =
-                  ax * scaleToFit + offsetX;
-                const sy =
-                  ay * scaleToFit + offsetY;
+                const [ax, ay] = getACPixelPosition(ac, roomW, roomH);
+                const sx = ax * scaleToFit + offsetX;
+                const sy = ay * scaleToFit + offsetY;
 
                 return (
                   <Group
@@ -743,45 +722,23 @@ export default function RoomDesigner() {
                     y={sy}
                     draggable={!exporting}
                     onDragEnd={(e) =>
-                      onACDragEnd(
-                        ac,
-                        e.target.x(),
-                        e.target.y()
-                      )
+                      onACDragEnd(ac, e.target.x(), e.target.y())
                     }
-                    onClick={() =>
-                      setSelectedAC(ac.id)
-                    }
+                    onClick={() => setSelectedAC(ac.id)}
                   >
                     <Rect
-                      width={
-                        ac.width * scaleToFit
-                      }
-                      height={
-                        ac.height * scaleToFit
-                      }
+                      width={ac.width * scaleToFit}
+                      height={ac.height * scaleToFit}
                       fill="#e8f3ff"
-                      stroke={
-                        selectedAC === ac.id
-                          ? "#d32f2f"
-                          : "#007dc3"
-                      }
-                      strokeWidth={
-                        selectedAC === ac.id
-                          ? 4
-                          : 2
-                      }
+                      stroke={selectedAC === ac.id ? "#d32f2f" : "#007dc3"}
+                      strokeWidth={selectedAC === ac.id ? 4 : 2}
                       cornerRadius={6}
                     />
 
                     <Text
                       text="AC Unit"
-                      width={
-                        ac.width * scaleToFit
-                      }
-                      height={
-                        ac.height * scaleToFit
-                      }
+                      width={ac.width * scaleToFit}
+                      height={ac.height * scaleToFit}
                       align="center"
                       verticalAlign="middle"
                       fill="#003a66"
@@ -794,28 +751,17 @@ export default function RoomDesigner() {
               {/* POLYGON EDIT HANDLES */}
               {editPolygon &&
                 polygon.map(([x, y], i) => {
-                  const vx =
-                    x * scaleToFit + offsetX;
-                  const vy =
-                    y * scaleToFit + offsetY;
+                  const vx = x * scaleToFit + offsetX;
+                  const vy = y * scaleToFit + offsetY;
 
-                  const next =
-                    polygon[(i + 1) % polygon.length];
-
+                  const next = polygon[(i + 1) % polygon.length];
                   const mx =
-                    ((x + next[0]) / 2) *
-                      scaleToFit +
-                    offsetX;
+                    ((x + next[0]) / 2) * scaleToFit + offsetX;
                   const my =
-                    ((y + next[1]) / 2) *
-                      scaleToFit +
-                    offsetY;
+                    ((y + next[1]) / 2) * scaleToFit + offsetY;
 
                   return (
-                    <React.Fragment
-                      key={i}
-                    >
-                      {/* Vertex */}
+                    <React.Fragment key={i}>
                       <Circle
                         x={vx}
                         y={vy}
@@ -824,15 +770,10 @@ export default function RoomDesigner() {
                         stroke="#007dc3"
                         strokeWidth={2}
                         draggable
-                        onDragMove={(e) =>
-                          handleVertexDragMove(i, e)
-                        }
-                        onDblClick={() =>
-                          handleVertexDoubleClick(i)
-                        }
+                        onDragMove={(e) => handleVertexDragMove(i, e)}
+                        onDblClick={() => handleVertexDoubleClick(i)}
                       />
 
-                      {/* Midpoint handle */}
                       <Circle
                         x={mx}
                         y={my}
@@ -840,9 +781,7 @@ export default function RoomDesigner() {
                         fill="#007dc3"
                         stroke="#ffffff"
                         strokeWidth={1}
-                        onClick={() =>
-                          handleAddPoint(i)
-                        }
+                        onClick={() => handleAddPoint(i)}
                       />
                     </React.Fragment>
                   );
@@ -854,5 +793,3 @@ export default function RoomDesigner() {
     </div>
   );
 }
-
-
