@@ -1,0 +1,60 @@
+/* styles.css — Final Modern Amgen Styling */
+
+/* Global Reset */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* Page baseline */
+body {
+  font-family: Inter, "Segoe UI", Arial, sans-serif;
+  background: #f6f8fa;
+  color: #003a66;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Buttons */
+button {
+  font-family: inherit;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background 0.15s ease, border 0.15s ease;
+}
+
+button:active {
+  transform: scale(0.97);
+}
+
+/* Inputs */
+input,
+select {
+  font-family: inherit;
+  outline: none;
+}
+
+/* Konva canvas smoothing */
+canvas {
+  image-rendering: optimizeQuality;
+}
+
+/* Scrollbars (light theme) */
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: #e3e9f1;
+  border-radius: 8px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #b7cbe0;
+  border-radius: 8px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #97b7d3;
+}
