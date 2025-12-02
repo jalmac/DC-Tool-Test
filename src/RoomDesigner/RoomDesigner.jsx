@@ -35,8 +35,8 @@ import {
   resizeAC,
 } from "./acUnits";
 
-import { ControlsPanel } from "./ui";
-import RackAssetPalette from "./RackAssetPalette";
+import { ControlsPanel } from "./ui.jsx";
+import RackAssetPalette from "./RackAssetPalette.jsx";
 
 // Preview canvas bounding box
 const PREVIEW_W = 900;
