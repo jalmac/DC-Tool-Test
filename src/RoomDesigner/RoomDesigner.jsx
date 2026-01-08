@@ -341,9 +341,9 @@ export default function RoomDesigner() {
     setRacks(packed);
   }
 
-  // ------------------ DOOR DRAG END ------------------
+  // ------------------ DOOR DRAG ------------------
 
-  function handleDoorDragEnd(e) {
+  function handleDoorDragMove(e) {
     const canvasX = e.target.x();
     const canvasY = e.target.y();
 
@@ -381,6 +381,10 @@ export default function RoomDesigner() {
 
     setDoorSide(side);
     setDoorOffset(best.t * 100);
+  }
+
+  function handleDoorDragEnd(e) {
+    handleDoorDragMove(e);
   }
 
   // ------------------ POLYGON EDIT ------------------
@@ -643,6 +647,7 @@ export default function RoomDesigner() {
                       stroke="#ffffff"
                       strokeWidth={2}
                       draggable
+                      onDragMove={handleDoorDragMove}
                       onDragEnd={handleDoorDragEnd}
                     />
                   </>
