@@ -82,6 +82,7 @@ export default function RoomDesigner() {
   const [showCableManagers, setShowCableManagers] = useState(false);
   const [cableManagerWidth, setCableManagerWidth] = useState(0.2);
   const [snapToRacks, setSnapToRacks] = useState(true);
+  const [showGrid, setShowGrid] = useState(false);
   const [racks, setRacks] = useState([]);
 
   const [acUnits, setAcUnits] = useState([]);
@@ -591,6 +592,8 @@ export default function RoomDesigner() {
           setCableManagerWidth={setCableManagerWidth}
           snapToRacks={snapToRacks}
           setSnapToRacks={setSnapToRacks}
+          showGrid={showGrid}
+          setShowGrid={setShowGrid}
           selectedAC={selectedAC}
           acWidth={
             acUnits.find((a) => a.id === selectedAC)?.width / scale || null
@@ -684,6 +687,50 @@ export default function RoomDesigner() {
             }}
           >
             <Layer>
+              {/* GRID LINES */}
+              {showGrid && !exporting && (() => {
+                const gridSize = scale; // One grid square per unit (foot or meter)
+                const lines = [];
+
+                // Vertical lines
+                for (let x = 0; x <= roomW; x += gridSize) {
+                  lines.push(
+                    <Line
+                      key={`v-${x}`}
+                      points={[
+                        x * scaleToFit + offsetX,
+                        0 * scaleToFit + offsetY,
+                        x * scaleToFit + offsetX,
+                        roomH * scaleToFit + offsetY,
+                      ]}
+                      stroke="rgba(0, 0, 0, 0.1)"
+                      strokeWidth={1}
+                      dash={[4, 4]}
+                    />
+                  );
+                }
+
+                // Horizontal lines
+                for (let y = 0; y <= roomH; y += gridSize) {
+                  lines.push(
+                    <Line
+                      key={`h-${y}`}
+                      points={[
+                        0 * scaleToFit + offsetX,
+                        y * scaleToFit + offsetY,
+                        roomW * scaleToFit + offsetX,
+                        y * scaleToFit + offsetY,
+                      ]}
+                      stroke="rgba(0, 0, 0, 0.1)"
+                      strokeWidth={1}
+                      dash={[4, 4]}
+                    />
+                  );
+                }
+
+                return lines;
+              })()}
+
               {/* ROOM POLYGON */}
               <Line
                 points={polygon.flatMap(([x, y]) => [
@@ -831,11 +878,30 @@ export default function RoomDesigner() {
                 const h = ac.height * scaleToFit;
                 const isSelected = selectedAC === ac.id;
 
+                // Rotate AC unit based on wall side
+                const rotation = (ac.side === 'left' || ac.side === 'right') ? 90 : 0;
+
+                // Adjust offset for rotation center
+                const offsetForRotation = rotation === 90 ? {
+                  offsetX: w / 2,
+                  offsetY: h / 2,
+                  x: sx + w / 2,
+                  y: sy + h / 2
+                } : {
+                  offsetX: 0,
+                  offsetY: 0,
+                  x: sx,
+                  y: sy
+                };
+
                 return (
                   <Group
                     key={ac.id}
-                    x={sx}
-                    y={sy}
+                    x={offsetForRotation.x}
+                    y={offsetForRotation.y}
+                    offsetX={offsetForRotation.offsetX}
+                    offsetY={offsetForRotation.offsetY}
+                    rotation={rotation}
                     draggable={!exporting}
                     onDragEnd={(e) =>
                       onACDragEnd(ac, e.target.x(), e.target.y())

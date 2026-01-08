@@ -98,6 +98,21 @@ export function ControlsPanel(props) {
         </label>
       </div>
 
+      {/* View Options */}
+      <div style={{ marginBottom: 22 }}>
+        <h3 style={headingStyle}>View Options</h3>
+
+        <label style={{ display: "flex", alignItems: "center", marginBottom: 8 }}>
+          <input
+            type="checkbox"
+            checked={props.showGrid}
+            onChange={(e) => props.setShowGrid(e.target.checked)}
+            style={{ marginRight: 10 }}
+          />
+          Show grid lines
+        </label>
+      </div>
+
       {/* Rack Settings */}
       <div style={{ marginBottom: 22 }}>
         <h3 style={headingStyle}>Rack Settings</h3>
