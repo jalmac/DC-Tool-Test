@@ -827,6 +827,9 @@ export default function RoomDesigner() {
                 const [ax, ay] = getACPixelPosition(ac, roomW, roomH);
                 const sx = ax * scaleToFit + offsetX;
                 const sy = ay * scaleToFit + offsetY;
+                const w = ac.width * scaleToFit;
+                const h = ac.height * scaleToFit;
+                const isSelected = selectedAC === ac.id;
 
                 return (
                   <Group
@@ -839,23 +842,100 @@ export default function RoomDesigner() {
                     }
                     onClick={() => setSelectedAC(ac.id)}
                   >
+                    {/* Shadow/Depth layer */}
+                    {!isSelected && (
+                      <Rect
+                        x={2}
+                        y={2}
+                        width={w}
+                        height={h}
+                        fill="rgba(0, 0, 0, 0.15)"
+                        cornerRadius={8}
+                      />
+                    )}
+
+                    {/* Main background */}
                     <Rect
-                      width={ac.width * scaleToFit}
-                      height={ac.height * scaleToFit}
-                      fill="#e8f3ff"
-                      stroke={selectedAC === ac.id ? "#d32f2f" : "#007dc3"}
-                      strokeWidth={selectedAC === ac.id ? 4 : 2}
-                      cornerRadius={6}
+                      width={w}
+                      height={h}
+                      fill="#0077be"
+                      stroke={isSelected ? "#d32f2f" : "#005a8f"}
+                      strokeWidth={isSelected ? 4 : 2}
+                      cornerRadius={8}
                     />
 
+                    {/* Lighter gradient overlay */}
+                    <Rect
+                      width={w}
+                      height={h / 2}
+                      fill="rgba(255, 255, 255, 0.15)"
+                      cornerRadius={8}
+                    />
+
+                    {/* Vent lines - horizontal grill pattern */}
+                    {[...Array(Math.floor(h / 12))].map((_, i) => (
+                      <Line
+                        key={`vent-${i}`}
+                        points={[
+                          w * 0.15,
+                          (i + 1) * 12,
+                          w * 0.85,
+                          (i + 1) * 12,
+                        ]}
+                        stroke="rgba(255, 255, 255, 0.25)"
+                        strokeWidth={1}
+                      />
+                    ))}
+
+                    {/* Fan/Cooling icon - center circle */}
+                    <Circle
+                      x={w / 2}
+                      y={h / 2}
+                      radius={Math.min(w, h) * 0.15}
+                      fill="rgba(255, 255, 255, 0.3)"
+                      stroke="rgba(255, 255, 255, 0.6)"
+                      strokeWidth={2}
+                    />
+
+                    {/* Fan blades - 4 small lines radiating from center */}
+                    {[0, 45, 90, 135, 180, 225, 270, 315].map((angle, i) => {
+                      const rad = (angle * Math.PI) / 180;
+                      const innerRadius = Math.min(w, h) * 0.08;
+                      const outerRadius = Math.min(w, h) * 0.2;
+                      return (
+                        <Line
+                          key={`blade-${i}`}
+                          points={[
+                            w / 2 + Math.cos(rad) * innerRadius,
+                            h / 2 + Math.sin(rad) * innerRadius,
+                            w / 2 + Math.cos(rad) * outerRadius,
+                            h / 2 + Math.sin(rad) * outerRadius,
+                          ]}
+                          stroke="rgba(255, 255, 255, 0.5)"
+                          strokeWidth={1.5}
+                        />
+                      );
+                    })}
+
+                    {/* AC Unit Label */}
+                    <Rect
+                      y={h - 18}
+                      width={w}
+                      height={18}
+                      fill="rgba(0, 0, 0, 0.4)"
+                      cornerRadius={8}
+                    />
                     <Text
-                      text="AC Unit"
-                      width={ac.width * scaleToFit}
-                      height={ac.height * scaleToFit}
+                      text="AC UNIT"
+                      y={h - 18}
+                      width={w}
+                      height={18}
                       align="center"
                       verticalAlign="middle"
-                      fill="#003a66"
-                      fontSize={12}
+                      fill="#ffffff"
+                      fontSize={10}
+                      fontStyle="bold"
+                      letterSpacing={0.5}
                     />
                   </Group>
                 );
