@@ -418,23 +418,27 @@ export default function RoomDesigner() {
   }
 
   function resetRacks() {
-    const packed = autoPackRacks(
-      numRacks,
-      numRows,
-      roomW,
-      roomH,
-      rackW,
-      rackD,
-      showCableManagers,
-      cableManagerPx,
-      rackInsidePoly,
-      rackDoorBlocked,
-      polygon,
-      doorSide,
-      door,
-      doorOffset
-    );
-    setRacks(packed);
+    // Force repack by temporarily clearing racks, then setting new packed positions
+    setRacks([]);
+    setTimeout(() => {
+      const packed = autoPackRacks(
+        numRacks,
+        numRows,
+        roomW,
+        roomH,
+        rackW,
+        rackD,
+        showCableManagers,
+        cableManagerPx,
+        rackInsidePoly,
+        rackDoorBlocked,
+        polygon,
+        doorSide,
+        door,
+        doorOffset
+      );
+      setRacks(packed);
+    }, 0);
   }
 
   // ------------------ DOOR DRAG ------------------
@@ -731,17 +735,19 @@ export default function RoomDesigner() {
                       strokeWidth={3}
                     />
 
-                    <Circle
-                      x={ax}
-                      y={ay}
-                      radius={7}
-                      fill="#007dc3"
-                      stroke="#ffffff"
-                      strokeWidth={2}
-                      draggable
-                      onDragMove={handleDoorDragMove}
-                      onDragEnd={handleDoorDragEnd}
-                    />
+                    {!exporting && (
+                      <Circle
+                        x={ax}
+                        y={ay}
+                        radius={7}
+                        fill="#007dc3"
+                        stroke="#ffffff"
+                        strokeWidth={2}
+                        draggable
+                        onDragMove={handleDoorDragMove}
+                        onDragEnd={handleDoorDragEnd}
+                      />
+                    )}
                   </>
                 );
               })()}
@@ -784,11 +790,21 @@ export default function RoomDesigner() {
 
               {/* CABLE MANAGERS */}
               {showCableManagers &&
-                racks.slice(0, -1).map((rk, i) => {
+                racks.map((rk, i) => {
+                  // Only show cable manager if there's a next rack that's horizontally adjacent
+                  if (i >= racks.length - 1) return null;
+
+                  const nextRack = racks[i + 1];
+                  const expectedX = rk.x + rackW + cableManagerPx;
+                  const yDiff = Math.abs(nextRack.y - rk.y);
+                  const xDiff = Math.abs(nextRack.x - expectedX);
+
+                  // Only show if next rack is on same row and horizontally adjacent
+                  const tolerance = 10;
+                  if (yDiff > tolerance || xDiff > tolerance) return null;
+
                   const cmX =
-                    (rk.x + rackW) * scaleToFit +
-                    offsetX +
-                    (cableManagerPx * scaleToFit) / 2;
+                    (rk.x + rackW) * scaleToFit + offsetX;
                   const cmY = rk.y * scaleToFit + offsetY;
 
                   return (
