@@ -251,6 +251,13 @@ export function ControlsPanel(props) {
           </label>
 
           <button
+            onClick={() => props.rotateAC(props.selectedAC)}
+            style={buttonStyle}
+          >
+            Rotate 90°
+          </button>
+
+          <button
             onClick={() => props.deleteAC(props.selectedAC)}
             style={{ ...buttonStyle, background: "#b02020" }}
           >

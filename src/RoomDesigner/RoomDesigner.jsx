@@ -306,6 +306,7 @@ export default function RoomDesigner() {
       offset: best.t,
       width: widthPx,
       height: heightPx,
+      rotation: 0,
     };
 
     const after = resolveACDrag(
@@ -372,6 +373,16 @@ export default function RoomDesigner() {
   function updateACSize(id, wPhysical, hPhysical) {
     setAcUnits((prev) =>
       resizeAC(prev, id, wPhysical * scale, hPhysical * scale)
+    );
+  }
+
+  function rotateAC(id) {
+    setAcUnits((prev) =>
+      prev.map((u) =>
+        u.id === id
+          ? { ...u, rotation: u.rotation === 90 ? 0 : 90 }
+          : u
+      )
     );
   }
 
@@ -603,6 +614,7 @@ export default function RoomDesigner() {
           }
           deleteAC={deleteAC}
           updateACSize={updateACSize}
+          rotateAC={rotateAC}
           exportPNG={exportPNG}
           exportJPG={exportJPG}
           exportPDF={exportPDF}
@@ -694,36 +706,38 @@ export default function RoomDesigner() {
 
                 // Vertical lines
                 for (let x = 0; x <= roomW; x += gridSize) {
+                  const scaledX = x * scaleToFit + offsetX;
                   lines.push(
                     <Line
                       key={`v-${x}`}
                       points={[
-                        x * scaleToFit + offsetX,
-                        0 * scaleToFit + offsetY,
-                        x * scaleToFit + offsetX,
+                        scaledX,
+                        offsetY,
+                        scaledX,
                         roomH * scaleToFit + offsetY,
                       ]}
-                      stroke="rgba(0, 0, 0, 0.1)"
+                      stroke="#cccccc"
                       strokeWidth={1}
-                      dash={[4, 4]}
+                      dash={[5, 5]}
                     />
                   );
                 }
 
                 // Horizontal lines
                 for (let y = 0; y <= roomH; y += gridSize) {
+                  const scaledY = y * scaleToFit + offsetY;
                   lines.push(
                     <Line
                       key={`h-${y}`}
                       points={[
-                        0 * scaleToFit + offsetX,
-                        y * scaleToFit + offsetY,
+                        offsetX,
+                        scaledY,
                         roomW * scaleToFit + offsetX,
-                        y * scaleToFit + offsetY,
+                        scaledY,
                       ]}
-                      stroke="rgba(0, 0, 0, 0.1)"
+                      stroke="#cccccc"
                       strokeWidth={1}
-                      dash={[4, 4]}
+                      dash={[5, 5]}
                     />
                   );
                 }
@@ -878,8 +892,8 @@ export default function RoomDesigner() {
                 const h = ac.height * scaleToFit;
                 const isSelected = selectedAC === ac.id;
 
-                // Rotate AC unit based on wall side
-                const rotation = (ac.side === 'left' || ac.side === 'right') ? 90 : 0;
+                // Use rotation from AC unit property (default to 0 if not set)
+                const rotation = ac.rotation || 0;
 
                 // Adjust offset for rotation center
                 const offsetForRotation = rotation === 90 ? {
