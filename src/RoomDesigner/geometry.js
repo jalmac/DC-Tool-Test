@@ -260,3 +260,39 @@ export function removePolygonPoint(points, index) {
   if (points.length <= 3) return points;
   return points.filter((_, i) => i !== index);
 }
+
+/* -----------------------------------------------------------
+ *  POLYGON EDGE SNAPPING
+ * --------------------------------------------------------- */
+
+/**
+ * Snap a point (with width/height) to the nearest polygon edge.
+ * Returns the closest edge index, parametric position (t), and snap coordinates.
+ */
+export function snapPointToPolygonEdges(px, py, width, height, polygon) {
+  let best = { dist: Infinity, edgeIdx: 0, t: 0, ex: 0, ey: 0 };
+
+  polygon.forEach((p1, i) => {
+    const p2 = polygon[(i + 1) % polygon.length];
+    const vx = p2[0] - p1[0];
+    const vy = p2[1] - p1[1];
+    const len2 = Math.max(vx * vx + vy * vy, 1);
+
+    // Project point onto edge line
+    const proj = ((px - p1[0]) * vx + (py - p1[1]) * vy) / len2;
+    const t = Math.max(0, Math.min(1, proj));
+
+    // Calculate edge point
+    const ex = p1[0] + vx * t;
+    const ey = p1[1] + vy * t;
+
+    // Calculate distance from point to edge
+    const d = Math.hypot(px - ex, py - ey);
+
+    if (d < best.dist) {
+      best = { dist: d, edgeIdx: i, t, ex, ey };
+    }
+  });
+
+  return best;
+}

@@ -358,7 +358,7 @@ export default function RoomDesigner() {
       const vy = p2[1] - p1[1];
       const len2 = Math.max(vx * vx + vy * vy, 1);
 
-      const proj = ((ax - p1[0]) * vx + (ay - p1[1])) / len2;
+      const proj = ((ax - p1[0]) * vx + (ay - p1[1]) * vy) / len2;
       const t = Math.max(0, Math.min(1, proj));
       const ex = p1[0] + vx * t;
       const ey = p1[1] + vy * t;
