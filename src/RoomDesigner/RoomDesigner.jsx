@@ -175,10 +175,106 @@ export default function RoomDesigner() {
     rackD,
     showCableManagers,
     cableManagerPx,
-    polygon,
     doorSide,
     doorOffset,
   ]);
+
+  // ------------------ EFFECT: REPOSITION INVALID RACKS ------------------
+
+  useEffect(() => {
+    if (racks.length === 0) return;
+
+    let hasChanges = false;
+    const updated = racks.map((rack) => {
+      // Check if current position is still valid
+      const isValid = rackPositionIsValid(
+        rack.x,
+        rack.y,
+        rackW,
+        rackD,
+        polygon,
+        rackInsidePoly,
+        rackDoorBlocked,
+        doorSide,
+        door,
+        roomW,
+        roomH,
+        doorOffset
+      );
+
+      if (isValid) return rack;
+
+      hasChanges = true;
+
+      // Try to find nearby valid position
+      const searchRadius = 50;
+      const searchSteps = 12;
+
+      for (let r = searchRadius; r <= searchRadius * 4; r += searchRadius) {
+        for (let i = 0; i < searchSteps; i++) {
+          const angle = (i / searchSteps) * Math.PI * 2;
+          const testX = rack.x + Math.cos(angle) * r;
+          const testY = rack.y + Math.sin(angle) * r;
+
+          if (
+            rackPositionIsValid(
+              testX,
+              testY,
+              rackW,
+              rackD,
+              polygon,
+              rackInsidePoly,
+              rackDoorBlocked,
+              doorSide,
+              door,
+              roomW,
+              roomH,
+              doorOffset
+            )
+          ) {
+            return { ...rack, x: testX, y: testY };
+          }
+        }
+      }
+
+      // If no nearby position found, try to find any valid position
+      const gridSteps = 10;
+      for (let gx = 0; gx < gridSteps; gx++) {
+        for (let gy = 0; gy < gridSteps; gy++) {
+          const testX = (roomW / gridSteps) * gx;
+          const testY = (roomH / gridSteps) * gy;
+
+          if (
+            rackPositionIsValid(
+              testX,
+              testY,
+              rackW,
+              rackD,
+              polygon,
+              rackInsidePoly,
+              rackDoorBlocked,
+              doorSide,
+              door,
+              roomW,
+              roomH,
+              doorOffset
+            )
+          ) {
+            return { ...rack, x: testX, y: testY };
+          }
+        }
+      }
+
+      // Keep rack at current position if no valid position found
+      return rack;
+    });
+
+    // Only update if positions actually changed
+    if (hasChanges) {
+      setRacks(updated);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [polygon]);
 
   // ------------------ AC UNIT ADD ------------------
 
@@ -396,17 +492,14 @@ export default function RoomDesigner() {
     const y = (canvasY - offsetY) / scaleToFit;
 
     setPolygon((prev) => movePolygonPoint(prev, index, x, y, roomW, roomH));
-    resetRacks();
   }
 
   function handleVertexDoubleClick(index) {
     setPolygon((prev) => removePolygonPoint(prev, index));
-    resetRacks();
   }
 
   function handleAddPoint(index) {
     setPolygon((prev) => addPolygonPoint(prev, index));
-    resetRacks();
   }
 
   function handleResetPolygon() {
@@ -416,7 +509,6 @@ export default function RoomDesigner() {
       [roomW, roomH],
       [0, roomH],
     ]);
-    resetRacks();
   }
 
   // ------------------ EXPORT ------------------
