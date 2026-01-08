@@ -329,8 +329,23 @@ export default function RoomDesigner() {
   // ------------------ AC DRAG END ------------------
 
   function onACDragEnd(ac, canvasX, canvasY) {
-    const px = (canvasX - offsetX) / scaleToFit;
-    const py = (canvasY - offsetY) / scaleToFit;
+    // Account for rotation offset
+    const rotation = ac.rotation || 0;
+    const w = ac.width * scaleToFit;
+    const h = ac.height * scaleToFit;
+
+    // Adjust canvas position if rotated
+    let adjustedX = canvasX;
+    let adjustedY = canvasY;
+
+    if (rotation === 90) {
+      // When rotated, the Group x,y is at center, so adjust back to top-left
+      adjustedX = canvasX - w / 2;
+      adjustedY = canvasY - h / 2;
+    }
+
+    const px = (adjustedX - offsetX) / scaleToFit;
+    const py = (adjustedY - offsetY) / scaleToFit;
 
     const best = snapPointToPolygonEdges(px, py, ac.width, ac.height, polygon);
 
@@ -701,21 +716,15 @@ export default function RoomDesigner() {
             <Layer>
               {/* GRID LINES */}
               {showGrid && !exporting && (() => {
-                const gridSize = scale; // One grid square per unit (foot or meter)
+                const gridSize = scale * scaleToFit; // Grid in screen pixels
                 const lines = [];
 
-                // Vertical lines
-                for (let x = 0; x <= roomW; x += gridSize) {
-                  const scaledX = x * scaleToFit + offsetX;
+                // Vertical lines - cover entire canvas width
+                for (let x = 0; x <= PREVIEW_W; x += gridSize) {
                   lines.push(
                     <Line
                       key={`v-${x}`}
-                      points={[
-                        scaledX,
-                        offsetY,
-                        scaledX,
-                        roomH * scaleToFit + offsetY,
-                      ]}
+                      points={[x, 0, x, PREVIEW_H]}
                       stroke="#cccccc"
                       strokeWidth={1}
                       dash={[5, 5]}
@@ -723,18 +732,12 @@ export default function RoomDesigner() {
                   );
                 }
 
-                // Horizontal lines
-                for (let y = 0; y <= roomH; y += gridSize) {
-                  const scaledY = y * scaleToFit + offsetY;
+                // Horizontal lines - cover entire canvas height
+                for (let y = 0; y <= PREVIEW_H; y += gridSize) {
                   lines.push(
                     <Line
                       key={`h-${y}`}
-                      points={[
-                        offsetX,
-                        scaledY,
-                        roomW * scaleToFit + offsetX,
-                        scaledY,
-                      ]}
+                      points={[0, y, PREVIEW_W, y]}
                       stroke="#cccccc"
                       strokeWidth={1}
                       dash={[5, 5]}
