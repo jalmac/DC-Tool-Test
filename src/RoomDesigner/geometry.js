@@ -158,7 +158,11 @@ export function computeDoorGeometry(
   });
 
   const [p1, p2] = [best.p1, best.p2];
-  const [mx, my] = best.mid;
+
+  // Use doorOffset to interpolate along the edge (doorOffset is 0-100)
+  const t = doorOffset / 100;
+  const doorX = p1[0] + (p2[0] - p1[0]) * t;
+  const doorY = p1[1] + (p2[1] - p1[1]) * t;
 
   const angle = Math.atan2(p2[1] - p1[1], p2[0] - p1[0]);
   const half = door.width / 2;
@@ -166,8 +170,8 @@ export function computeDoorGeometry(
   const gx = half * Math.cos(angle);
   const gy = half * Math.sin(angle);
 
-  const gapStart = [mx - gx, my - gy];
-  const gapEnd = [mx + gx, my + gy];
+  const gapStart = [doorX - gx, doorY - gy];
+  const gapEnd = [doorX + gx, doorY + gy];
 
   const leafAngle = angle - Math.PI / 2;
   const leaf = [
@@ -181,7 +185,7 @@ export function computeDoorGeometry(
     gapStart,
     gapEnd,
     leaf,
-    anchor: [mx, my],
+    anchor: [doorX, doorY],
     edgeIdx: best.edgeIdx,
   };
 }
