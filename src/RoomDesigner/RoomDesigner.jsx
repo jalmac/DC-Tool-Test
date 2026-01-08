@@ -361,21 +361,14 @@ export default function RoomDesigner() {
       side = best.ex < roomW / 2 ? "left" : "right";
     }
 
-    const snap = { side, offset: best.t };
-
-    const updated = resolveACDrag(
-      acUnits,
-      ac,
-      snap,
-      polygon,
-      roomW,
-      roomH,
-      doorSide,
-      door,
-      doorOffset
+    // Directly update side and offset without validation
+    setAcUnits((prev) =>
+      prev.map((u) =>
+        u.id === ac.id
+          ? { ...u, side, offset: best.t * 100 }
+          : u
+      )
     );
-
-    setAcUnits(updated);
   }
 
   // ------------------ DELETE / RESIZE AC ------------------
@@ -407,6 +400,37 @@ export default function RoomDesigner() {
     let x = (canvasX - offsetX) / scaleToFit;
     let y = (canvasY - offsetY) / scaleToFit;
 
+    // Rack-to-rack snapping
+    const SNAP_THRESHOLD = 20; // pixels in room space
+    const ALIGNMENT_THRESHOLD = 15; // for Y-axis alignment
+
+    // Check proximity to other racks
+    racks.forEach((otherRack, otherIndex) => {
+      if (otherIndex === index) return; // Skip self
+
+      // Snap to Y-axis alignment (same row)
+      const yDiff = Math.abs(y - otherRack.y);
+      if (yDiff < ALIGNMENT_THRESHOLD) {
+        y = otherRack.y;
+      }
+
+      // Snap to right side of other rack (with cable manager space if enabled)
+      const cableSpace = showCableManagers ? cableManagerPx : 0;
+      const rightSnapX = otherRack.x + rackW + cableSpace;
+      const xDiffRight = Math.abs(x - rightSnapX);
+      if (xDiffRight < SNAP_THRESHOLD && yDiff < ALIGNMENT_THRESHOLD) {
+        x = rightSnapX;
+      }
+
+      // Snap to left side of other rack
+      const leftSnapX = otherRack.x - rackW - cableSpace;
+      const xDiffLeft = Math.abs(x - leftSnapX);
+      if (xDiffLeft < SNAP_THRESHOLD && yDiff < ALIGNMENT_THRESHOLD) {
+        x = leftSnapX;
+      }
+    });
+
+    // Grid snapping (existing functionality)
     if (snapToRacks && racks.length > 0) {
       const snapped = snapRackToGrid(
         index,
@@ -418,8 +442,15 @@ export default function RoomDesigner() {
         numRacks,
         numRows
       );
-      x = snapped.x;
-      y = snapped.y;
+      // Only use grid snap if we didn't already snap to another rack
+      const didRackSnap = racks.some((r, i) => {
+        if (i === index) return false;
+        return Math.abs(y - r.y) < 1; // Check if we snapped to Y
+      });
+      if (!didRackSnap) {
+        x = snapped.x;
+        y = snapped.y;
+      }
     }
 
     const valid = rackPositionIsValid(
@@ -855,20 +886,10 @@ export default function RoomDesigner() {
               {/* CABLE MANAGERS */}
               {showCableManagers &&
                 racks.map((rk, i) => {
-                  // Only show cable manager if there's a next rack that's horizontally adjacent
+                  // Show cable manager on right side of each rack (except last)
                   if (i >= racks.length - 1) return null;
 
-                  const nextRack = racks[i + 1];
-                  const expectedX = rk.x + rackW + cableManagerPx;
-                  const yDiff = Math.abs(nextRack.y - rk.y);
-                  const xDiff = Math.abs(nextRack.x - expectedX);
-
-                  // Only show if next rack is on same row and horizontally adjacent
-                  const tolerance = 10;
-                  if (yDiff > tolerance || xDiff > tolerance) return null;
-
-                  const cmX =
-                    (rk.x + rackW) * scaleToFit + offsetX;
+                  const cmX = (rk.x + rackW) * scaleToFit + offsetX;
                   const cmY = rk.y * scaleToFit + offsetY;
 
                   return (
