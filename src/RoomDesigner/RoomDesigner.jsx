@@ -91,6 +91,9 @@ export default function RoomDesigner() {
   const [cameras, setCameras] = useState([]);
   const [selectedCamera, setSelectedCamera] = useState(null);
 
+  const [upsUnits, setUpsUnits] = useState([]);
+  const [selectedUPS, setSelectedUPS] = useState(null);
+
   const [exporting, setExporting] = useState(false);
 
   // ------------------ DERIVED GEOMETRY ------------------
@@ -408,7 +411,7 @@ export default function RoomDesigner() {
       id: Date.now() + Math.random(),
       x: px,
       y: py,
-      size: 20, // Default size in room units
+      size: 35, // Default size in room units
       rotation: 0,
     };
 
@@ -446,6 +449,58 @@ export default function RoomDesigner() {
         c.id === id
           ? { ...c, rotation: (c.rotation + 45) % 360 }
           : c
+      )
+    );
+  }
+
+  // ------------------ UPS FUNCTIONS ------------------
+
+  function addUPSCanvasCoords(canvasX, canvasY) {
+    const px = (canvasX - offsetX) / scaleToFit;
+    const py = (canvasY - offsetY) / scaleToFit;
+
+    const ups = {
+      id: Date.now() + Math.random(),
+      x: px,
+      y: py,
+      size: 35, // Default size in room units
+      rotation: 0,
+    };
+
+    setUpsUnits((prev) => [...prev, ups]);
+    setSelectedUPS(ups.id);
+  }
+
+  function onUPSDragEnd(ups, canvasX, canvasY) {
+    const px = (canvasX - offsetX) / scaleToFit;
+    const py = (canvasY - offsetY) / scaleToFit;
+
+    setUpsUnits((prev) =>
+      prev.map((u) =>
+        u.id === ups.id ? { ...u, x: px, y: py } : u
+      )
+    );
+  }
+
+  function deleteUPS(id) {
+    setUpsUnits((prev) => prev.filter((u) => u.id !== id));
+    if (selectedUPS === id) setSelectedUPS(null);
+  }
+
+  function updateUPSSize(id, size) {
+    setUpsUnits((prev) =>
+      prev.map((u) =>
+        u.id === id ? { ...u, size: Math.max(10, size) } : u
+      )
+    );
+  }
+
+  function rotateUPS(id) {
+    setUpsUnits((prev) =>
+      prev.map((u) =>
+        u.id === id
+          ? { ...u, rotation: (u.rotation + 45) % 360 }
+          : u
       )
     );
   }
@@ -722,6 +777,11 @@ export default function RoomDesigner() {
           deleteCamera={deleteCamera}
           updateCameraSize={updateCameraSize}
           rotateCamera={rotateCamera}
+          selectedUPS={selectedUPS}
+          upsSize={upsUnits.find((u) => u.id === selectedUPS)?.size || null}
+          deleteUPS={deleteUPS}
+          updateUPSSize={updateUPSSize}
+          rotateUPS={rotateUPS}
           exportPNG={exportPNG}
           exportJPG={exportJPG}
           exportPDF={exportPDF}
@@ -797,6 +857,11 @@ export default function RoomDesigner() {
                 e.clientX - rect.left,
                 e.clientY - rect.top
               );
+            } else if (type === "UPS") {
+              addUPSCanvasCoords(
+                e.clientX - rect.left,
+                e.clientY - rect.top
+              );
             }
           }}
         >
@@ -808,6 +873,7 @@ export default function RoomDesigner() {
               if (e.target === e.target.getStage()) {
                 setSelectedAC(null);
                 setSelectedCamera(null);
+                setSelectedUPS(null);
               }
             }}
           >
@@ -1013,100 +1079,72 @@ export default function RoomDesigner() {
                     }
                     onClick={() => setSelectedAC(ac.id)}
                   >
-                    {/* Shadow/Depth layer */}
-                    {!isSelected && (
-                      <Rect
-                        x={2}
-                        y={2}
-                        width={w}
-                        height={h}
-                        fill="rgba(0, 0, 0, 0.15)"
-                        cornerRadius={8}
-                      />
-                    )}
-
-                    {/* Main background */}
+                    {/* Main body */}
                     <Rect
                       width={w}
                       height={h}
-                      fill="#0077be"
-                      stroke={isSelected ? "#d32f2f" : "#005a8f"}
-                      strokeWidth={isSelected ? 4 : 2}
-                      cornerRadius={8}
+                      fill="#1976d2"
+                      stroke={isSelected ? "#d32f2f" : "#0d47a1"}
+                      strokeWidth={isSelected ? 3 : 2}
+                      cornerRadius={4}
                     />
 
-                    {/* Lighter gradient overlay */}
+                    {/* Top highlight */}
                     <Rect
                       width={w}
-                      height={h / 2}
+                      height={h * 0.25}
                       fill="rgba(255, 255, 255, 0.15)"
-                      cornerRadius={8}
+                      cornerRadius={4}
                     />
 
-                    {/* Vent lines - horizontal grill pattern */}
-                    {[...Array(Math.floor(h / 12))].map((_, i) => (
-                      <Line
+                    {/* Cooling vents - simplified */}
+                    {[0.3, 0.45, 0.6, 0.75].map((ratio, i) => (
+                      <Rect
                         key={`vent-${i}`}
-                        points={[
-                          w * 0.15,
-                          (i + 1) * 12,
-                          w * 0.85,
-                          (i + 1) * 12,
-                        ]}
-                        stroke="rgba(255, 255, 255, 0.25)"
-                        strokeWidth={1}
+                        x={w * 0.15}
+                        y={h * ratio - 1.5}
+                        width={w * 0.7}
+                        height={3}
+                        fill="rgba(255, 255, 255, 0.2)"
+                        cornerRadius={1}
                       />
                     ))}
 
-                    {/* Fan/Cooling icon - center circle */}
+                    {/* Fan icon - center */}
                     <Circle
                       x={w / 2}
-                      y={h / 2}
-                      radius={Math.min(w, h) * 0.15}
-                      fill="rgba(255, 255, 255, 0.3)"
+                      y={h * 0.35}
+                      radius={Math.min(w, h) * 0.12}
+                      fill="none"
                       stroke="rgba(255, 255, 255, 0.6)"
                       strokeWidth={2}
                     />
 
-                    {/* Fan blades - 4 small lines radiating from center */}
-                    {[0, 45, 90, 135, 180, 225, 270, 315].map((angle, i) => {
+                    {/* Fan blades - simple cross */}
+                    {[0, 90, 180, 270].map((angle, i) => {
                       const rad = (angle * Math.PI) / 180;
-                      const innerRadius = Math.min(w, h) * 0.08;
-                      const outerRadius = Math.min(w, h) * 0.2;
+                      const radius = Math.min(w, h) * 0.18;
                       return (
                         <Line
                           key={`blade-${i}`}
                           points={[
-                            w / 2 + Math.cos(rad) * innerRadius,
-                            h / 2 + Math.sin(rad) * innerRadius,
-                            w / 2 + Math.cos(rad) * outerRadius,
-                            h / 2 + Math.sin(rad) * outerRadius,
+                            w / 2,
+                            h * 0.35,
+                            w / 2 + Math.cos(rad) * radius,
+                            h * 0.35 + Math.sin(rad) * radius,
                           ]}
                           stroke="rgba(255, 255, 255, 0.5)"
-                          strokeWidth={1.5}
+                          strokeWidth={2}
                         />
                       );
                     })}
 
-                    {/* AC Unit Label */}
-                    <Rect
-                      y={h - 18}
-                      width={w}
-                      height={18}
-                      fill="rgba(0, 0, 0, 0.4)"
-                      cornerRadius={8}
-                    />
-                    <Text
-                      text="AC UNIT"
-                      y={h - 18}
-                      width={w}
-                      height={18}
-                      align="center"
-                      verticalAlign="middle"
-                      fill="#ffffff"
-                      fontSize={10}
-                      fontStyle="bold"
-                      letterSpacing={0.5}
+                    {/* Direction indicator */}
+                    <Circle
+                      x={w / 2}
+                      y={h * 0.9}
+                      radius={3}
+                      fill={isSelected ? "#d32f2f" : "#64b5f6"}
                     />
                   </Group>
                 );
@@ -1170,6 +1208,92 @@ export default function RoomDesigner() {
                       y={-size * 0.5}
                       radius={3}
                       fill={isSelected ? "#d32f2f" : "#ff5252"}
+                    />
+                  </Group>
+                );
+              })}
+
+              {/* UPS UNITS */}
+              {upsUnits.map((ups) => {
+                const sx = ups.x * scaleToFit + offsetX;
+                const sy = ups.y * scaleToFit + offsetY;
+                const size = ups.size;
+                const isSelected = selectedUPS === ups.id;
+
+                return (
+                  <Group
+                    key={ups.id}
+                    x={sx}
+                    y={sy}
+                    rotation={ups.rotation}
+                    draggable={!exporting}
+                    onDragEnd={(e) =>
+                      onUPSDragEnd(ups, e.target.x(), e.target.y())
+                    }
+                    onClick={() => {
+                      setSelectedUPS(ups.id);
+                      setSelectedAC(null);
+                      setSelectedCamera(null);
+                    }}
+                  >
+                    {/* UPS body */}
+                    <Rect
+                      x={-size / 2}
+                      y={-size / 2}
+                      width={size}
+                      height={size * 0.8}
+                      fill="#ff6f00"
+                      stroke={isSelected ? "#d32f2f" : "#e65100"}
+                      strokeWidth={isSelected ? 3 : 2}
+                      cornerRadius={3}
+                    />
+
+                    {/* Battery indicator bars */}
+                    <Rect
+                      x={-size * 0.3}
+                      y={-size * 0.25}
+                      width={size * 0.6}
+                      height={size * 0.15}
+                      fill="#4caf50"
+                      cornerRadius={1}
+                    />
+                    <Rect
+                      x={-size * 0.3}
+                      y={-size * 0.05}
+                      width={size * 0.6}
+                      height={size * 0.15}
+                      fill="#4caf50"
+                      cornerRadius={1}
+                    />
+                    <Rect
+                      x={-size * 0.3}
+                      y={size * 0.15}
+                      width={size * 0.6}
+                      height={size * 0.15}
+                      fill="#4caf50"
+                      cornerRadius={1}
+                    />
+
+                    {/* Power symbol */}
+                    <Circle
+                      x={0}
+                      y={-size * 0.35}
+                      radius={size * 0.08}
+                      stroke="#ffffff"
+                      strokeWidth={2}
+                    />
+                    <Line
+                      points={[0, -size * 0.35, 0, -size * 0.45]}
+                      stroke="#ffffff"
+                      strokeWidth={2}
+                    />
+
+                    {/* Direction indicator */}
+                    <Circle
+                      x={0}
+                      y={size * 0.45}
+                      radius={3}
+                      fill={isSelected ? "#d32f2f" : "#ffb300"}
                     />
                   </Group>
                 );

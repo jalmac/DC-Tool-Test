@@ -121,6 +121,55 @@ export default function RackAssetPalette() {
         </div>
       </div>
 
+      {/* UPS */}
+      <div
+        draggable
+        onDragStart={(e) => {
+          e.dataTransfer.setData("asset-type", "UPS");
+        }}
+        style={{
+          width: "100%",
+          border: "2px solid #ff6f00",
+          background: "#fff3e0",
+          borderRadius: 10,
+          padding: "14px 10px",
+          textAlign: "center",
+          cursor: "grab",
+          boxShadow: "0 2px 6px rgba(0,0,0,0.06)",
+          transition: "box-shadow 0.2s ease",
+        }}
+        title="Drag anywhere in the room"
+      >
+        {/* UPS/Battery icon */}
+        <svg
+          width="38"
+          height="38"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="#ff6f00"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          style={{ marginBottom: 6 }}
+        >
+          <rect x="2" y="7" width="16" height="13" rx="2" ry="2"></rect>
+          <line x1="22" y1="11" x2="22" y2="17"></line>
+          <line x1="6" y1="11" x2="6" y2="13"></line>
+          <line x1="10" y1="11" x2="10" y2="13"></line>
+        </svg>
+
+        <div
+          style={{
+            fontSize: 15,
+            fontWeight: 600,
+            color: "#e65100",
+            letterSpacing: 0.3,
+          }}
+        >
+          UPS
+        </div>
+      </div>
+
       <div
         style={{
           fontSize: 12,

@@ -304,6 +304,44 @@ export function ControlsPanel(props) {
         </div>
       )}
 
+      {/* UPS Settings */}
+      {props.selectedUPS && (
+        <div style={{ marginBottom: 22 }}>
+          <h3 style={headingStyle}>UPS</h3>
+
+          <label style={{ display: "block", marginBottom: 10 }}>
+            Size:
+            <input
+              type="number"
+              step={1}
+              min={10}
+              value={props.upsSize || ""}
+              onChange={(e) =>
+                props.updateUPSSize(
+                  props.selectedUPS,
+                  Number(e.target.value)
+                )
+              }
+              style={inputStyle}
+            />
+          </label>
+
+          <button
+            onClick={() => props.rotateUPS(props.selectedUPS)}
+            style={buttonStyle}
+          >
+            Rotate 45°
+          </button>
+
+          <button
+            onClick={() => props.deleteUPS(props.selectedUPS)}
+            style={{ ...buttonStyle, background: "#b02020" }}
+          >
+            Delete UPS
+          </button>
+        </div>
+      )}
+
       {/* Export */}
       <div style={{ marginBottom: 10 }}>
         <h3 style={headingStyle}>Export</h3>
