@@ -342,6 +342,96 @@ export function ControlsPanel(props) {
         </div>
       )}
 
+      {/* Label Settings */}
+      {props.selectedLabel && (
+        <div style={{ marginBottom: 22 }}>
+          <h3 style={headingStyle}>Text Label</h3>
+
+          <label style={{ display: "block", marginBottom: 10 }}>
+            Text:
+            <input
+              type="text"
+              value={props.labelText || ""}
+              onChange={(e) =>
+                props.updateLabelText(
+                  props.selectedLabel,
+                  e.target.value
+                )
+              }
+              style={inputStyle}
+            />
+          </label>
+
+          <label style={{ display: "block", marginBottom: 10 }}>
+            Font Size:
+            <input
+              type="number"
+              step={1}
+              min={8}
+              value={props.labelFontSize || ""}
+              onChange={(e) =>
+                props.updateLabelFontSize(
+                  props.selectedLabel,
+                  Number(e.target.value)
+                )
+              }
+              style={inputStyle}
+            />
+          </label>
+
+          <label style={{ display: "block", marginBottom: 10 }}>
+            Color:
+            <input
+              type="color"
+              value={props.labelColor || "#000000"}
+              onChange={(e) =>
+                props.updateLabelColor(
+                  props.selectedLabel,
+                  e.target.value
+                )
+              }
+              style={{ ...inputStyle, height: 35 }}
+            />
+          </label>
+
+          <button
+            onClick={() => props.deleteLabel(props.selectedLabel)}
+            style={{ ...buttonStyle, background: "#b02020" }}
+          >
+            Delete Label
+          </button>
+        </div>
+      )}
+
+      {/* Measurement Tool */}
+      <div style={{ marginBottom: 22 }}>
+        <h3 style={headingStyle}>Measurement Tool</h3>
+
+        <button
+          onClick={props.toggleMeasurementMode}
+          style={{
+            ...buttonStyle,
+            background: props.measurementMode ? "#4caf50" : "#007dc3",
+          }}
+        >
+          {props.measurementMode ? "✓ Measuring (click 2 points)" : "Start Measuring"}
+        </button>
+
+        {props.measurementsCount > 0 && (
+          <div style={{ marginTop: 10 }}>
+            <div style={{ fontSize: 13, color: "#666", marginBottom: 8 }}>
+              {props.measurementsCount} measurement{props.measurementsCount !== 1 ? 's' : ''}
+            </div>
+            <button
+              onClick={props.clearAllMeasurements}
+              style={{ ...buttonStyle, background: "#b02020" }}
+            >
+              Clear All Measurements
+            </button>
+          </div>
+        )}
+      </div>
+
       {/* Export */}
       <div style={{ marginBottom: 10 }}>
         <h3 style={headingStyle}>Export</h3>

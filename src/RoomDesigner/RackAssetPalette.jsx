@@ -170,6 +170,54 @@ export default function RackAssetPalette() {
         </div>
       </div>
 
+      {/* Text Label */}
+      <div
+        draggable
+        onDragStart={(e) => {
+          e.dataTransfer.setData("asset-type", "Label");
+        }}
+        style={{
+          width: "100%",
+          border: "2px solid #9c27b0",
+          background: "#f3e5f5",
+          borderRadius: 10,
+          padding: "14px 10px",
+          textAlign: "center",
+          cursor: "grab",
+          boxShadow: "0 2px 6px rgba(0,0,0,0.06)",
+          transition: "box-shadow 0.2s ease",
+        }}
+        title="Drag anywhere to add text"
+      >
+        {/* Label/Text icon */}
+        <svg
+          width="38"
+          height="38"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="#9c27b0"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          style={{ marginBottom: 6 }}
+        >
+          <polyline points="4 7 4 4 20 4 20 7"></polyline>
+          <line x1="9" y1="20" x2="15" y2="20"></line>
+          <line x1="12" y1="4" x2="12" y2="20"></line>
+        </svg>
+
+        <div
+          style={{
+            fontSize: 15,
+            fontWeight: 600,
+            color: "#7b1fa2",
+            letterSpacing: 0.3,
+          }}
+        >
+          Text Label
+        </div>
+      </div>
+
       <div
         style={{
           fontSize: 12,

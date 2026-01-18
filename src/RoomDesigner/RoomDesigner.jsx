@@ -91,6 +91,13 @@ export default function RoomDesigner() {
   const [upsUnits, setUpsUnits] = useState([]);
   const [selectedUPS, setSelectedUPS] = useState(null);
 
+  const [labels, setLabels] = useState([]);
+  const [selectedLabel, setSelectedLabel] = useState(null);
+
+  const [measurements, setMeasurements] = useState([]);
+  const [measurementMode, setMeasurementMode] = useState(false);
+  const [measurementStart, setMeasurementStart] = useState(null);
+
   const [exporting, setExporting] = useState(false);
 
   // ------------------ DERIVED GEOMETRY ------------------
@@ -443,6 +450,113 @@ export default function RoomDesigner() {
     );
   }
 
+  // ------------------ LABEL FUNCTIONS ------------------
+
+  function addLabelCanvasCoords(canvasX, canvasY) {
+    const px = (canvasX - offsetX) / scaleToFit;
+    const py = (canvasY - offsetY) / scaleToFit;
+
+    const label = {
+      id: Date.now() + Math.random(),
+      x: px,
+      y: py,
+      text: "Label",
+      fontSize: 16,
+      color: "#000000",
+    };
+
+    setLabels((prev) => [...prev, label]);
+    setSelectedLabel(label.id);
+  }
+
+  function onLabelDragEnd(label, canvasX, canvasY) {
+    const px = (canvasX - offsetX) / scaleToFit;
+    const py = (canvasY - offsetY) / scaleToFit;
+
+    setLabels((prev) =>
+      prev.map((l) =>
+        l.id === label.id ? { ...l, x: px, y: py } : l
+      )
+    );
+  }
+
+  function deleteLabel(id) {
+    setLabels((prev) => prev.filter((l) => l.id !== id));
+    if (selectedLabel === id) setSelectedLabel(null);
+  }
+
+  function updateLabelText(id, text) {
+    setLabels((prev) =>
+      prev.map((l) =>
+        l.id === id ? { ...l, text } : l
+      )
+    );
+  }
+
+  function updateLabelFontSize(id, fontSize) {
+    setLabels((prev) =>
+      prev.map((l) =>
+        l.id === id ? { ...l, fontSize: Math.max(8, fontSize) } : l
+      )
+    );
+  }
+
+  function updateLabelColor(id, color) {
+    setLabels((prev) =>
+      prev.map((l) =>
+        l.id === id ? { ...l, color } : l
+      )
+    );
+  }
+
+  // ------------------ MEASUREMENT FUNCTIONS ------------------
+
+  function toggleMeasurementMode() {
+    setMeasurementMode((prev) => !prev);
+    setMeasurementStart(null);
+  }
+
+  function handleMeasurementClick(e) {
+    if (!measurementMode) return;
+
+    const stage = e.target.getStage();
+    const point = stage.getPointerPosition();
+    const px = (point.x - offsetX) / scaleToFit;
+    const py = (point.y - offsetY) / scaleToFit;
+
+    if (!measurementStart) {
+      // First click - set start point
+      setMeasurementStart({ x: px, y: py });
+    } else {
+      // Second click - create measurement
+      const distance = Math.sqrt(
+        Math.pow(px - measurementStart.x, 2) +
+        Math.pow(py - measurementStart.y, 2)
+      );
+
+      const measurement = {
+        id: Date.now() + Math.random(),
+        x1: measurementStart.x,
+        y1: measurementStart.y,
+        x2: px,
+        y2: py,
+        distance: distance / scale, // Convert to physical units
+      };
+
+      setMeasurements((prev) => [...prev, measurement]);
+      setMeasurementStart(null);
+    }
+  }
+
+  function deleteMeasurement(id) {
+    setMeasurements((prev) => prev.filter((m) => m.id !== id));
+  }
+
+  function clearAllMeasurements() {
+    setMeasurements([]);
+    setMeasurementStart(null);
+  }
+
   // ------------------ RACK DRAG END ------------------
 
   function onRackDragEnd(index, canvasX, canvasY) {
@@ -720,6 +834,18 @@ export default function RoomDesigner() {
           deleteUPS={deleteUPS}
           updateUPSSize={updateUPSSize}
           rotateUPS={rotateUPS}
+          selectedLabel={selectedLabel}
+          labelText={labels.find((l) => l.id === selectedLabel)?.text || ""}
+          labelFontSize={labels.find((l) => l.id === selectedLabel)?.fontSize || 16}
+          labelColor={labels.find((l) => l.id === selectedLabel)?.color || "#000000"}
+          updateLabelText={updateLabelText}
+          updateLabelFontSize={updateLabelFontSize}
+          updateLabelColor={updateLabelColor}
+          deleteLabel={deleteLabel}
+          measurementMode={measurementMode}
+          toggleMeasurementMode={toggleMeasurementMode}
+          measurementsCount={measurements.length}
+          clearAllMeasurements={clearAllMeasurements}
           exportPNG={exportPNG}
           exportJPG={exportJPG}
           exportPDF={exportPDF}
@@ -800,6 +926,11 @@ export default function RoomDesigner() {
                 e.clientX - rect.left,
                 e.clientY - rect.top
               );
+            } else if (type === "Label") {
+              addLabelCanvasCoords(
+                e.clientX - rect.left,
+                e.clientY - rect.top
+              );
             }
           }}
         >
@@ -808,10 +939,13 @@ export default function RoomDesigner() {
             height={PREVIEW_H}
             ref={stageRef}
             onMouseDown={(e) => {
-              if (e.target === e.target.getStage()) {
+              if (measurementMode) {
+                handleMeasurementClick(e);
+              } else if (e.target === e.target.getStage()) {
                 setSelectedAC(null);
                 setSelectedCamera(null);
                 setSelectedUPS(null);
+                setSelectedLabel(null);
               }
             }}
           >
@@ -1234,6 +1368,138 @@ export default function RoomDesigner() {
                   </Group>
                 );
               })}
+
+              {/* TEXT LABELS */}
+              {labels.map((label) => {
+                const sx = label.x * scaleToFit + offsetX;
+                const sy = label.y * scaleToFit + offsetY;
+                const isSelected = selectedLabel === label.id;
+
+                return (
+                  <Text
+                    key={label.id}
+                    x={sx}
+                    y={sy}
+                    text={label.text}
+                    fontSize={label.fontSize}
+                    fill={label.color}
+                    fontStyle="bold"
+                    draggable={!exporting}
+                    onDragEnd={(e) =>
+                      onLabelDragEnd(label, e.target.x(), e.target.y())
+                    }
+                    onClick={() => {
+                      setSelectedLabel(label.id);
+                      setSelectedAC(null);
+                      setSelectedCamera(null);
+                      setSelectedUPS(null);
+                    }}
+                    stroke={isSelected ? "#d32f2f" : "transparent"}
+                    strokeWidth={isSelected ? 1 : 0}
+                  />
+                );
+              })}
+
+              {/* MEASUREMENTS */}
+              {measurements.map((measurement) => {
+                const sx1 = measurement.x1 * scaleToFit + offsetX;
+                const sy1 = measurement.y1 * scaleToFit + offsetY;
+                const sx2 = measurement.x2 * scaleToFit + offsetX;
+                const sy2 = measurement.y2 * scaleToFit + offsetY;
+                const midX = (sx1 + sx2) / 2;
+                const midY = (sy1 + sy2) / 2;
+
+                return (
+                  <Group key={measurement.id}>
+                    {/* Measurement line */}
+                    <Line
+                      points={[sx1, sy1, sx2, sy2]}
+                      stroke="#ff9800"
+                      strokeWidth={2}
+                      dash={[5, 5]}
+                    />
+
+                    {/* Start point */}
+                    <Circle
+                      x={sx1}
+                      y={sy1}
+                      radius={4}
+                      fill="#ff9800"
+                    />
+
+                    {/* End point */}
+                    <Circle
+                      x={sx2}
+                      y={sy2}
+                      radius={4}
+                      fill="#ff9800"
+                    />
+
+                    {/* Distance label */}
+                    <Group x={midX} y={midY - 15}>
+                      <Rect
+                        x={-30}
+                        y={0}
+                        width={60}
+                        height={20}
+                        fill="white"
+                        stroke="#ff9800"
+                        strokeWidth={1}
+                        cornerRadius={3}
+                      />
+                      <Text
+                        x={-30}
+                        y={3}
+                        width={60}
+                        text={`${measurement.distance.toFixed(1)} ${unit}`}
+                        fontSize={11}
+                        fill="#ff9800"
+                        align="center"
+                        fontStyle="bold"
+                      />
+                    </Group>
+
+                    {/* Delete button (only when not exporting) */}
+                    {!exporting && (
+                      <Group
+                        x={sx2 + 10}
+                        y={sy2 - 10}
+                        onClick={() => deleteMeasurement(measurement.id)}
+                      >
+                        <Circle
+                          radius={8}
+                          fill="#d32f2f"
+                          opacity={0.8}
+                        />
+                        <Line
+                          points={[-3, -3, 3, 3]}
+                          stroke="white"
+                          strokeWidth={2}
+                        />
+                        <Line
+                          points={[-3, 3, 3, -3]}
+                          stroke="white"
+                          strokeWidth={2}
+                        />
+                      </Group>
+                    )}
+                  </Group>
+                );
+              })}
+
+              {/* Measurement preview line (during measurement) */}
+              {measurementMode && measurementStart && !exporting && (
+                <Group>
+                  <Circle
+                    x={measurementStart.x * scaleToFit + offsetX}
+                    y={measurementStart.y * scaleToFit + offsetY}
+                    radius={5}
+                    fill="#ff9800"
+                    stroke="white"
+                    strokeWidth={2}
+                  />
+                </Group>
+              )}
 
               {/* POLYGON EDIT HANDLES */}
               {editPolygon &&
