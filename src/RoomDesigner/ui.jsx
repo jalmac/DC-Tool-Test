@@ -266,6 +266,44 @@ export function ControlsPanel(props) {
         </div>
       )}
 
+      {/* Camera Settings */}
+      {props.selectedCamera && (
+        <div style={{ marginBottom: 22 }}>
+          <h3 style={headingStyle}>Camera</h3>
+
+          <label style={{ display: "block", marginBottom: 10 }}>
+            Size:
+            <input
+              type="number"
+              step={1}
+              min={10}
+              value={props.cameraSize || ""}
+              onChange={(e) =>
+                props.updateCameraSize(
+                  props.selectedCamera,
+                  Number(e.target.value)
+                )
+              }
+              style={inputStyle}
+            />
+          </label>
+
+          <button
+            onClick={() => props.rotateCamera(props.selectedCamera)}
+            style={buttonStyle}
+          >
+            Rotate 45°
+          </button>
+
+          <button
+            onClick={() => props.deleteCamera(props.selectedCamera)}
+            style={{ ...buttonStyle, background: "#b02020" }}
+          >
+            Delete Camera
+          </button>
+        </div>
+      )}
+
       {/* Export */}
       <div style={{ marginBottom: 10 }}>
         <h3 style={headingStyle}>Export</h3>

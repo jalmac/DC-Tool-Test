@@ -16,9 +16,11 @@ export default function RackAssetPalette() {
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
+        gap: 12,
         marginBottom: 20,
       }}
     >
+      {/* AC Unit */}
       <div
         draggable
         onDragStart={(e) => {
@@ -72,16 +74,62 @@ export default function RackAssetPalette() {
         </div>
       </div>
 
+      {/* Camera */}
+      <div
+        draggable
+        onDragStart={(e) => {
+          e.dataTransfer.setData("asset-type", "Camera");
+        }}
+        style={{
+          width: "100%",
+          border: "2px solid #2e7d32",
+          background: "#e8f5e9",
+          borderRadius: 10,
+          padding: "14px 10px",
+          textAlign: "center",
+          cursor: "grab",
+          boxShadow: "0 2px 6px rgba(0,0,0,0.06)",
+          transition: "box-shadow 0.2s ease",
+        }}
+        title="Drag anywhere in the room"
+      >
+        {/* Camera icon */}
+        <svg
+          width="38"
+          height="38"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="#2e7d32"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          style={{ marginBottom: 6 }}
+        >
+          <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+          <circle cx="12" cy="13" r="4"></circle>
+        </svg>
+
+        <div
+          style={{
+            fontSize: 15,
+            fontWeight: 600,
+            color: "#1b5e20",
+            letterSpacing: 0.3,
+          }}
+        >
+          Camera
+        </div>
+      </div>
+
       <div
         style={{
-          marginTop: 12,
           fontSize: 12,
           color: "#3c6d99",
           textAlign: "center",
         }}
       >
-        Drag into the<br />
-        room layout
+        Drag assets into<br />
+        the room layout
       </div>
     </div>
   );

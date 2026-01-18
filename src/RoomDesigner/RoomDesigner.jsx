@@ -88,6 +88,9 @@ export default function RoomDesigner() {
   const [acUnits, setAcUnits] = useState([]);
   const [selectedAC, setSelectedAC] = useState(null);
 
+  const [cameras, setCameras] = useState([]);
+  const [selectedCamera, setSelectedCamera] = useState(null);
+
   const [exporting, setExporting] = useState(false);
 
   // ------------------ DERIVED GEOMETRY ------------------
@@ -394,6 +397,58 @@ export default function RoomDesigner() {
     );
   }
 
+  // ------------------ CAMERA FUNCTIONS ------------------
+
+  function addCameraCanvasCoords(canvasX, canvasY) {
+    const px = (canvasX - offsetX) / scaleToFit;
+    const py = (canvasY - offsetY) / scaleToFit;
+
+    const camera = {
+      id: Date.now() + Math.random(),
+      x: px,
+      y: py,
+      size: 20, // Default size in room units
+      rotation: 0,
+    };
+
+    setCameras((prev) => [...prev, camera]);
+    setSelectedCamera(camera.id);
+  }
+
+  function onCameraDragEnd(camera, canvasX, canvasY) {
+    const px = (canvasX - offsetX) / scaleToFit;
+    const py = (canvasY - offsetY) / scaleToFit;
+
+    setCameras((prev) =>
+      prev.map((c) =>
+        c.id === camera.id ? { ...c, x: px, y: py } : c
+      )
+    );
+  }
+
+  function deleteCamera(id) {
+    setCameras((prev) => prev.filter((c) => c.id !== id));
+    if (selectedCamera === id) setSelectedCamera(null);
+  }
+
+  function updateCameraSize(id, size) {
+    setCameras((prev) =>
+      prev.map((c) =>
+        c.id === id ? { ...c, size: Math.max(10, size) } : c
+      )
+    );
+  }
+
+  function rotateCamera(id) {
+    setCameras((prev) =>
+      prev.map((c) =>
+        c.id === id
+          ? { ...c, rotation: (c.rotation + 45) % 360 }
+          : c
+      )
+    );
+  }
+
   // ------------------ RACK DRAG END ------------------
 
   function onRackDragEnd(index, canvasX, canvasY) {
@@ -661,6 +716,11 @@ export default function RoomDesigner() {
           deleteAC={deleteAC}
           updateACSize={updateACSize}
           rotateAC={rotateAC}
+          selectedCamera={selectedCamera}
+          cameraSize={cameras.find((c) => c.id === selectedCamera)?.size || null}
+          deleteCamera={deleteCamera}
+          updateCameraSize={updateCameraSize}
+          rotateCamera={rotateCamera}
           exportPNG={exportPNG}
           exportJPG={exportJPG}
           exportPDF={exportPDF}
@@ -725,9 +785,14 @@ export default function RoomDesigner() {
           onDrop={(e) => {
             e.preventDefault();
             const type = e.dataTransfer.getData("asset-type");
+            const rect = e.currentTarget.getBoundingClientRect();
             if (type === "ACUnit") {
-              const rect = e.currentTarget.getBoundingClientRect();
               addACCanvasCoords(
+                e.clientX - rect.left,
+                e.clientY - rect.top
+              );
+            } else if (type === "Camera") {
+              addCameraCanvasCoords(
                 e.clientX - rect.left,
                 e.clientY - rect.top
               );
@@ -741,6 +806,7 @@ export default function RoomDesigner() {
             onMouseDown={(e) => {
               if (e.target === e.target.getStage()) {
                 setSelectedAC(null);
+                setSelectedCamera(null);
               }
             }}
           >
@@ -1040,6 +1106,69 @@ export default function RoomDesigner() {
                       fontSize={10}
                       fontStyle="bold"
                       letterSpacing={0.5}
+                    />
+                  </Group>
+                );
+              })}
+
+              {/* CAMERAS */}
+              {cameras.map((camera) => {
+                const sx = camera.x * scaleToFit + offsetX;
+                const sy = camera.y * scaleToFit + offsetY;
+                const size = camera.size;
+                const isSelected = selectedCamera === camera.id;
+
+                return (
+                  <Group
+                    key={camera.id}
+                    x={sx}
+                    y={sy}
+                    rotation={camera.rotation}
+                    draggable={!exporting}
+                    onDragEnd={(e) =>
+                      onCameraDragEnd(camera, e.target.x(), e.target.y())
+                    }
+                    onClick={() => {
+                      setSelectedCamera(camera.id);
+                      setSelectedAC(null);
+                    }}
+                  >
+                    {/* Camera body */}
+                    <Rect
+                      x={-size / 2}
+                      y={-size / 2}
+                      width={size}
+                      height={size * 0.7}
+                      fill="#2e7d32"
+                      stroke={isSelected ? "#d32f2f" : "#1b5e20"}
+                      strokeWidth={isSelected ? 3 : 2}
+                      cornerRadius={4}
+                    />
+
+                    {/* Camera lens */}
+                    <Circle
+                      x={0}
+                      y={0}
+                      radius={size * 0.25}
+                      fill="#424242"
+                      stroke="#616161"
+                      strokeWidth={1.5}
+                    />
+
+                    {/* Lens reflection */}
+                    <Circle
+                      x={-size * 0.08}
+                      y={-size * 0.08}
+                      radius={size * 0.1}
+                      fill="rgba(255, 255, 255, 0.6)"
+                    />
+
+                    {/* Direction indicator */}
+                    <Circle
+                      x={0}
+                      y={-size * 0.5}
+                      radius={3}
+                      fill={isSelected ? "#d32f2f" : "#ff5252"}
                     />
                   </Group>
                 );
