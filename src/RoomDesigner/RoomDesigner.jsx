@@ -170,6 +170,7 @@ export default function RoomDesigner() {
     );
 
     setRacks(packed);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     numRacks,
     numRows,

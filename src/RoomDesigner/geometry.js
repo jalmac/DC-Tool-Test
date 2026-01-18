@@ -45,7 +45,7 @@ export function pointInsidePolygon([px, py], poly) {
     const [xj, yj] = poly[j];
 
     const intersect =
-      yi > py !== yj > py &&
+      (yi > py) !== (yj > py) &&
       px < ((xj - xi) * (py - yi)) / (yj - yi || 1) + xi;
 
     if (intersect) inside = !inside;

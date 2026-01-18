@@ -5,7 +5,6 @@
 import {
   boxInsidePolygon,
   isInDoorSwing,
-  snapPointToPolygonEdges,
   getWallPosition,
 } from "./geometry";
 
