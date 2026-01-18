@@ -790,7 +790,6 @@ export default function RoomDesigner() {
     <div style={{ display: "flex", gap: 24 }}>
       {/* LEFT SIDEBAR */}
       <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
-        <RackAssetPalette />
         <ControlsPanel
           unit={unit}
           setUnit={setUnit}
@@ -853,8 +852,10 @@ export default function RoomDesigner() {
         />
       </div>
 
-      {/* RIGHT SIDE (Canvas + tools) */}
-      <div style={{ flex: 1 }}>
+      {/* RIGHT SIDE (Canvas + asset palette) */}
+      <div style={{ flex: 1, display: "flex", gap: 20 }}>
+        {/* Canvas container */}
+        <div style={{ flex: 1 }}>
         {/* Polygon edit toolbar */}
         <div
           style={{
@@ -1464,7 +1465,10 @@ export default function RoomDesigner() {
                       <Group
                         x={sx2 + 10}
                         y={sy2 - 10}
-                        onClick={() => deleteMeasurement(measurement.id)}
+                        onClick={(e) => {
+                          e.cancelBubble = true;
+                          deleteMeasurement(measurement.id);
+                        }}
                       >
                         <Circle
                           radius={8}
@@ -1542,6 +1546,10 @@ export default function RoomDesigner() {
             </Layer>
           </Stage>
         </div>
+        </div>
+
+        {/* Asset Palette */}
+        <RackAssetPalette />
       </div>
     </div>
   );
