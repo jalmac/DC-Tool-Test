@@ -254,7 +254,7 @@ export function ControlsPanel(props) {
             onClick={() => props.rotateAC(props.selectedAC)}
             style={buttonStyle}
           >
-            Rotate 90°
+            Rotate 45°
           </button>
 
           <button

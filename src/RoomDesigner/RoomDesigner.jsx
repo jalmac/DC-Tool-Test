@@ -13,7 +13,6 @@ import {
   boxInsidePolygon,
   computeDoorGeometry,
   isInDoorSwing,
-  snapPointToPolygonEdges,
 } from "./geometry";
 
 import {
@@ -23,8 +22,6 @@ import {
 } from "./racks";
 
 import {
-  getACPixelPosition,
-  resolveACDrag,
   resizeAC,
 } from "./acUnits";
 
@@ -293,87 +290,28 @@ export default function RoomDesigner() {
     const widthPx = 3 * scale;
     const heightPx = 1 * scale;
 
-    const best = snapPointToPolygonEdges(px, py, widthPx, heightPx, polygon);
-
-    const p1 = polygon[best.edgeIdx];
-    const p2 = polygon[(best.edgeIdx + 1) % polygon.length];
-    const dx = p2[0] - p1[0];
-    const dy = p2[1] - p1[1];
-
-    let side;
-    if (Math.abs(dx) >= Math.abs(dy)) {
-      side = best.ey < roomH / 2 ? "top" : "bottom";
-    } else {
-      side = best.ex < roomW / 2 ? "left" : "right";
-    }
-
-    const provisional = {
+    const ac = {
       id: Date.now() + Math.random(),
-      side,
-      offset: best.t,
+      x: px,
+      y: py,
       width: widthPx,
       height: heightPx,
       rotation: 0,
     };
 
-    const after = resolveACDrag(
-      [],
-      provisional,
-      { side, offset: best.t },
-      polygon,
-      roomW,
-      roomH,
-      doorSide,
-      door,
-      doorOffset
-    );
-
-    const finalAC = after[0] || provisional;
-    setAcUnits((prev) => [...prev, finalAC]);
-    setSelectedAC(finalAC.id);
+    setAcUnits((prev) => [...prev, ac]);
+    setSelectedAC(ac.id);
   }
 
   // ------------------ AC DRAG END ------------------
 
   function onACDragEnd(ac, canvasX, canvasY) {
-    // Account for rotation offset
-    const rotation = ac.rotation || 0;
-    const w = ac.width * scaleToFit;
-    const h = ac.height * scaleToFit;
+    const px = (canvasX - offsetX) / scaleToFit;
+    const py = (canvasY - offsetY) / scaleToFit;
 
-    // Adjust canvas position if rotated
-    let adjustedX = canvasX;
-    let adjustedY = canvasY;
-
-    if (rotation === 90) {
-      // When rotated, the Group x,y is at center, so adjust back to top-left
-      adjustedX = canvasX - w / 2;
-      adjustedY = canvasY - h / 2;
-    }
-
-    const px = (adjustedX - offsetX) / scaleToFit;
-    const py = (adjustedY - offsetY) / scaleToFit;
-
-    const best = snapPointToPolygonEdges(px, py, ac.width, ac.height, polygon);
-
-    const p1 = polygon[best.edgeIdx];
-    const p2 = polygon[(best.edgeIdx + 1) % polygon.length];
-    const dx = p2[0] - p1[0];
-    const dy = p2[1] - p1[1];
-
-    let side;
-    if (Math.abs(dx) >= Math.abs(dy)) {
-      side = best.ey < roomH / 2 ? "top" : "bottom";
-    } else {
-      side = best.ex < roomW / 2 ? "left" : "right";
-    }
-
-    // Directly update side and offset without validation
     setAcUnits((prev) =>
       prev.map((u) =>
-        u.id === ac.id
-          ? { ...u, side, offset: best.t * 100 }
-          : u
+        u.id === ac.id ? { ...u, x: px, y: py } : u
       )
     );
   }
@@ -395,7 +333,7 @@ export default function RoomDesigner() {
     setAcUnits((prev) =>
       prev.map((u) =>
         u.id === id
-          ? { ...u, rotation: u.rotation === 90 ? 0 : 90 }
+          ? { ...u, rotation: (u.rotation + 45) % 360 }
           : u
       )
     );
@@ -1042,107 +980,105 @@ export default function RoomDesigner() {
 
               {/* AC UNITS */}
               {acUnits.map((ac) => {
-                const [ax, ay] = getACPixelPosition(ac, roomW, roomH);
-                const sx = ax * scaleToFit + offsetX;
-                const sy = ay * scaleToFit + offsetY;
+                const sx = ac.x * scaleToFit + offsetX;
+                const sy = ac.y * scaleToFit + offsetY;
                 const w = ac.width * scaleToFit;
                 const h = ac.height * scaleToFit;
                 const isSelected = selectedAC === ac.id;
 
-                // Use rotation from AC unit property (default to 0 if not set)
-                const rotation = ac.rotation || 0;
-
-                // Adjust offset for rotation center
-                const offsetForRotation = rotation === 90 ? {
-                  offsetX: w / 2,
-                  offsetY: h / 2,
-                  x: sx + w / 2,
-                  y: sy + h / 2
-                } : {
-                  offsetX: 0,
-                  offsetY: 0,
-                  x: sx,
-                  y: sy
-                };
-
                 return (
                   <Group
                     key={ac.id}
-                    x={offsetForRotation.x}
-                    y={offsetForRotation.y}
-                    offsetX={offsetForRotation.offsetX}
-                    offsetY={offsetForRotation.offsetY}
-                    rotation={rotation}
+                    x={sx}
+                    y={sy}
+                    rotation={ac.rotation || 0}
                     draggable={!exporting}
                     onDragEnd={(e) =>
                       onACDragEnd(ac, e.target.x(), e.target.y())
                     }
-                    onClick={() => setSelectedAC(ac.id)}
+                    onClick={() => {
+                      setSelectedAC(ac.id);
+                      setSelectedCamera(null);
+                      setSelectedUPS(null);
+                    }}
                   >
-                    {/* Main body */}
+                    {/* Main AC body - white/light gray like typical wall ACs */}
                     <Rect
                       width={w}
                       height={h}
-                      fill="#1976d2"
-                      stroke={isSelected ? "#d32f2f" : "#0d47a1"}
+                      fill="#f5f5f5"
+                      stroke={isSelected ? "#d32f2f" : "#9e9e9e"}
                       strokeWidth={isSelected ? 3 : 2}
                       cornerRadius={4}
                     />
 
-                    {/* Top highlight */}
+                    {/* Top panel - darker gray */}
                     <Rect
                       width={w}
-                      height={h * 0.25}
-                      fill="rgba(255, 255, 255, 0.15)"
+                      height={h * 0.2}
+                      fill="#e0e0e0"
                       cornerRadius={4}
                     />
 
-                    {/* Cooling vents - simplified */}
-                    {[0.3, 0.45, 0.6, 0.75].map((ratio, i) => (
-                      <Rect
+                    {/* Air outlet vents - horizontal louvers */}
+                    {[0.35, 0.45, 0.55, 0.65, 0.75, 0.85].map((ratio, i) => (
+                      <Line
                         key={`vent-${i}`}
-                        x={w * 0.15}
-                        y={h * ratio - 1.5}
-                        width={w * 0.7}
-                        height={3}
-                        fill="rgba(255, 255, 255, 0.2)"
-                        cornerRadius={1}
+                        points={[w * 0.1, h * ratio, w * 0.9, h * ratio]}
+                        stroke="#bdbdbd"
+                        strokeWidth={2}
                       />
                     ))}
 
-                    {/* Fan icon - center */}
-                    <Circle
-                      x={w / 2}
-                      y={h * 0.35}
-                      radius={Math.min(w, h) * 0.12}
-                      fill="none"
-                      stroke="rgba(255, 255, 255, 0.6)"
-                      strokeWidth={2}
+                    {/* "AC" Label - top left */}
+                    <Text
+                      text="AC"
+                      x={w * 0.05}
+                      y={h * 0.03}
+                      fontSize={Math.min(w, h) * 0.15}
+                      fill="#757575"
+                      fontStyle="bold"
                     />
 
-                    {/* Fan blades - simple cross */}
-                    {[0, 90, 180, 270].map((angle, i) => {
-                      const rad = (angle * Math.PI) / 180;
-                      const radius = Math.min(w, h) * 0.18;
+                    {/* Power indicator light */}
+                    <Circle
+                      x={w * 0.85}
+                      y={h * 0.1}
+                      radius={Math.min(w, h) * 0.04}
+                      fill="#4caf50"
+                    />
+
+                    {/* Airflow indicator arrows */}
+                    {[0, 1, 2].map((i) => {
+                      const startY = h * 0.45;
+                      const arrowX = w * (0.3 + i * 0.2);
                       return (
-                        <Line
-                          key={`blade-${i}`}
-                          points={[
-                            w / 2,
-                            h * 0.35,
-                            w / 2 + Math.cos(rad) * radius,
-                            h * 0.35 + Math.sin(rad) * radius,
-                          ]}
-                          stroke="rgba(255, 255, 255, 0.5)"
-                          strokeWidth={2}
-                        />
+                        <Group key={`arrow-${i}`}>
+                          <Line
+                            points={[
+                              arrowX, startY,
+                              arrowX, startY + h * 0.25
+                            ]}
+                            stroke="#64b5f6"
+                            strokeWidth={1.5}
+                          />
+                          <Line
+                            points={[
+                              arrowX - 3, startY + h * 0.2,
+                              arrowX, startY + h * 0.25,
+                              arrowX + 3, startY + h * 0.2
+                            ]}
+                            stroke="#64b5f6"
+                            strokeWidth={1.5}
+                          />
+                        </Group>
                       );
                     })}
 
                     {/* Direction indicator */}
                     <Circle
                       x={w / 2}
-                      y={h * 0.9}
+                      y={h * 0.95}
                       radius={3}
                       fill={isSelected ? "#d32f2f" : "#64b5f6"}
                     />
