@@ -519,6 +519,11 @@ export default function RoomDesigner() {
   function handleMeasurementClick(e) {
     if (!measurementMode) return;
 
+    // Don't create measurement if clicking on a UI element (not the stage background)
+    if (e.target !== e.target.getStage()) {
+      return;
+    }
+
     const stage = e.target.getStage();
     const point = stage.getPointerPosition();
     const px = (point.x - offsetX) / scaleToFit;

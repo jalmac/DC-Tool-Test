@@ -61,154 +61,6 @@ export function ControlsPanel(props) {
         Controls
       </h2>
 
-      {/* Room Settings */}
-      <div style={{ marginBottom: 22 }}>
-        <h3 style={headingStyle}>Room Settings</h3>
-
-        <label style={{ display: "block", marginBottom: 10 }}>
-          Unit:
-          <select
-            value={props.unit}
-            onChange={(e) => props.setUnit(e.target.value)}
-            style={{ ...inputStyle, width: 120 }}
-          >
-            <option value="feet">Feet</option>
-            <option value="meters">Meters</option>
-          </select>
-        </label>
-
-        <label style={{ display: "block", marginBottom: 10 }}>
-          Width:
-          <input
-            type="number"
-            value={props.roomWidth}
-            onChange={(e) => props.setRoomWidth(Number(e.target.value))}
-            style={inputStyle}
-          />
-        </label>
-
-        <label style={{ display: "block", marginBottom: 10 }}>
-          Length:
-          <input
-            type="number"
-            value={props.roomLength}
-            onChange={(e) => props.setRoomLength(Number(e.target.value))}
-            style={inputStyle}
-          />
-        </label>
-      </div>
-
-      {/* View Options */}
-      <div style={{ marginBottom: 22 }}>
-        <h3 style={headingStyle}>View Options</h3>
-
-        <label style={{ display: "flex", alignItems: "center", marginBottom: 8 }}>
-          <input
-            type="checkbox"
-            checked={props.showGrid}
-            onChange={(e) => props.setShowGrid(e.target.checked)}
-            style={{ marginRight: 10 }}
-          />
-          Show grid lines
-        </label>
-      </div>
-
-      {/* Rack Settings */}
-      <div style={{ marginBottom: 22 }}>
-        <h3 style={headingStyle}>Rack Settings</h3>
-
-        <label style={{ display: "block", marginBottom: 10 }}>
-          Racks:
-          <input
-            type="number"
-            min={1}
-            max={50}
-            value={props.numRacks}
-            onChange={(e) => props.setNumRacks(Number(e.target.value))}
-            style={inputStyle}
-          />
-        </label>
-
-        <label style={{ display: "block", marginBottom: 10 }}>
-          Rows:
-          <input
-            type="number"
-            min={1}
-            max={props.numRacks}
-            value={props.numRows}
-            onChange={(e) => props.setNumRows(Number(e.target.value))}
-            style={inputStyle}
-          />
-        </label>
-
-        <label style={{ display: "block", marginBottom: 10 }}>
-          Rack Width:
-          <input
-            type="number"
-            step={0.01}
-            value={props.rackWidth}
-            onChange={(e) => props.setRackWidth(Number(e.target.value))}
-            style={inputStyle}
-          />
-        </label>
-
-        <label style={{ display: "block", marginBottom: 10 }}>
-          Rack Depth:
-          <input
-            type="number"
-            step={0.01}
-            value={props.rackDepth}
-            onChange={(e) => props.setRackDepth(Number(e.target.value))}
-            style={inputStyle}
-          />
-        </label>
-
-        <label style={{ display: "flex", alignItems: "center", marginBottom: 8 }}>
-          <input
-            type="checkbox"
-            checked={props.snapToRacks}
-            onChange={(e) => props.setSnapToRacks(e.target.checked)}
-            style={{ marginRight: 10 }}
-          />
-          Snap racks to grid
-        </label>
-
-        <button onClick={props.resetRacks} style={buttonStyle}>
-          Reset Racks
-        </button>
-      </div>
-
-      {/* Cable Managers */}
-      <div style={{ marginBottom: 22 }}>
-        <h3 style={headingStyle}>Cable Managers</h3>
-
-        <label style={{ display: "block", marginBottom: 10 }}>
-          Width:
-          <input
-            type="number"
-            step={0.01}
-            min={0.01}
-            value={props.cableManagerWidth}
-            onChange={(e) =>
-              props.setCableManagerWidth(Number(e.target.value))
-            }
-            style={inputStyle}
-          />
-        </label>
-
-        <button
-          onClick={() =>
-            props.setShowCableManagers(!props.showCableManagers)
-          }
-          style={{
-            ...buttonStyle,
-            background: props.showCableManagers ? "#4caf50" : "#007dc3",
-          }}
-        >
-          {props.showCableManagers ? "Hide" : "Show"} Cable Managers
-        </button>
-      </div>
-
       {/* AC Unit Settings */}
       {props.selectedAC && (
         <div style={{ marginBottom: 22 }}>
@@ -402,6 +254,154 @@ export function ControlsPanel(props) {
           </button>
         </div>
       )}
+
+      {/* Room Settings */}
+      <div style={{ marginBottom: 22 }}>
+        <h3 style={headingStyle}>Room Settings</h3>
+
+        <label style={{ display: "block", marginBottom: 10 }}>
+          Unit:
+          <select
+            value={props.unit}
+            onChange={(e) => props.setUnit(e.target.value)}
+            style={{ ...inputStyle, width: 120 }}
+          >
+            <option value="feet">Feet</option>
+            <option value="meters">Meters</option>
+          </select>
+        </label>
+
+        <label style={{ display: "block", marginBottom: 10 }}>
+          Width:
+          <input
+            type="number"
+            value={props.roomWidth}
+            onChange={(e) => props.setRoomWidth(Number(e.target.value))}
+            style={inputStyle}
+          />
+        </label>
+
+        <label style={{ display: "block", marginBottom: 10 }}>
+          Length:
+          <input
+            type="number"
+            value={props.roomLength}
+            onChange={(e) => props.setRoomLength(Number(e.target.value))}
+            style={inputStyle}
+          />
+        </label>
+      </div>
+
+      {/* View Options */}
+      <div style={{ marginBottom: 22 }}>
+        <h3 style={headingStyle}>View Options</h3>
+
+        <label style={{ display: "flex", alignItems: "center", marginBottom: 8 }}>
+          <input
+            type="checkbox"
+            checked={props.showGrid}
+            onChange={(e) => props.setShowGrid(e.target.checked)}
+            style={{ marginRight: 10 }}
+          />
+          Show grid lines
+        </label>
+      </div>
+
+      {/* Rack Settings */}
+      <div style={{ marginBottom: 22 }}>
+        <h3 style={headingStyle}>Rack Settings</h3>
+
+        <label style={{ display: "block", marginBottom: 10 }}>
+          Racks:
+          <input
+            type="number"
+            min={1}
+            max={50}
+            value={props.numRacks}
+            onChange={(e) => props.setNumRacks(Number(e.target.value))}
+            style={inputStyle}
+          />
+        </label>
+
+        <label style={{ display: "block", marginBottom: 10 }}>
+          Rows:
+          <input
+            type="number"
+            min={1}
+            max={props.numRacks}
+            value={props.numRows}
+            onChange={(e) => props.setNumRows(Number(e.target.value))}
+            style={inputStyle}
+          />
+        </label>
+
+        <label style={{ display: "block", marginBottom: 10 }}>
+          Rack Width:
+          <input
+            type="number"
+            step={0.01}
+            value={props.rackWidth}
+            onChange={(e) => props.setRackWidth(Number(e.target.value))}
+            style={inputStyle}
+          />
+        </label>
+
+        <label style={{ display: "block", marginBottom: 10 }}>
+          Rack Depth:
+          <input
+            type="number"
+            step={0.01}
+            value={props.rackDepth}
+            onChange={(e) => props.setRackDepth(Number(e.target.value))}
+            style={inputStyle}
+          />
+        </label>
+
+        <label style={{ display: "flex", alignItems: "center", marginBottom: 8 }}>
+          <input
+            type="checkbox"
+            checked={props.snapToRacks}
+            onChange={(e) => props.setSnapToRacks(e.target.checked)}
+            style={{ marginRight: 10 }}
+          />
+          Snap racks to grid
+        </label>
+
+        <button onClick={props.resetRacks} style={buttonStyle}>
+          Reset Racks
+        </button>
+      </div>
+
+      {/* Cable Managers */}
+      <div style={{ marginBottom: 22 }}>
+        <h3 style={headingStyle}>Cable Managers</h3>
+
+        <label style={{ display: "block", marginBottom: 10 }}>
+          Width:
+          <input
+            type="number"
+            step={0.01}
+            min={0.01}
+            value={props.cableManagerWidth}
+            onChange={(e) =>
+              props.setCableManagerWidth(Number(e.target.value))
+            }
+            style={inputStyle}
+          />
+        </label>
+
+        <button
+          onClick={() =>
+            props.setShowCableManagers(!props.showCableManagers)
+          }
+          style={{
+            ...buttonStyle,
+            background: props.showCableManagers ? "#4caf50" : "#007dc3",
+          }}
+        >
+          {props.showCableManagers ? "Hide" : "Show"} Cable Managers
+        </button>
+      </div>
 
       {/* Measurement Tool */}
       <div style={{ marginBottom: 22 }}>
