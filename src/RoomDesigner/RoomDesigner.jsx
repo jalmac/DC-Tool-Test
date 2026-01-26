@@ -72,10 +72,10 @@ export default function RoomDesigner() {
   const [doorSide, setDoorSide] = useState("top");
   const [doorOffset, setDoorOffset] = useState(50);
 
-  const [numRacks, setNumRacks] = useState(4);
+  const [numRacks, setNumRacks] = useState(2);
   const [numRows, setNumRows] = useState(1);
-  const [rackWidthPhysical, setRackWidthPhysical] = useState(1);
-  const [rackDepthPhysical, setRackDepthPhysical] = useState(1.5);
+  const [rackWidthPhysical, setRackWidthPhysical] = useState(1.5);
+  const [rackDepthPhysical, setRackDepthPhysical] = useState(2);
   const [showCableManagers, setShowCableManagers] = useState(false);
   const [cableManagerWidth, setCableManagerWidth] = useState(0.2);
   const [snapToRacks, setSnapToRacks] = useState(true);
