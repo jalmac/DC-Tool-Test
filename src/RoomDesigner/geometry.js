@@ -130,7 +130,8 @@ export function computeDoorGeometry(
   door,
   roomW,
   roomH,
-  doorOffset = 50
+  doorOffset = 50,
+  doorFlipped = false
 ) {
   if (!polygon || polygon.length < 3) return null;
 
@@ -173,7 +174,7 @@ export function computeDoorGeometry(
   const gapStart = [doorX - gx, doorY - gy];
   const gapEnd = [doorX + gx, doorY + gy];
 
-  const leafAngle = angle - Math.PI / 4;
+  const leafAngle = doorFlipped ? angle + Math.PI / 4 : angle - Math.PI / 4;
   const leaf = [
     gapStart[0],
     gapStart[1],
@@ -200,7 +201,8 @@ export function isInDoorSwing(
   roomW,
   roomH,
   polygon,
-  doorOffset
+  doorOffset,
+  doorFlipped = false
 ) {
   const g = computeDoorGeometry(
     polygon,
@@ -208,7 +210,8 @@ export function isInDoorSwing(
     door,
     roomW,
     roomH,
-    doorOffset
+    doorOffset,
+    doorFlipped
   );
   if (!g) return false;
 

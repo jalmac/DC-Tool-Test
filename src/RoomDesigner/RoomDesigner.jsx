@@ -71,6 +71,7 @@ export default function RoomDesigner() {
 
   const [doorSide, setDoorSide] = useState("top");
   const [doorOffset, setDoorOffset] = useState(50);
+  const [doorFlipped, setDoorFlipped] = useState(false);
 
   const [numRacks, setNumRacks] = useState(2);
   const [numRows, setNumRows] = useState(1);
@@ -135,7 +136,8 @@ export default function RoomDesigner() {
     roomWArg,
     roomHArg,
     polygonArg,
-    doorOffsetArg
+    doorOffsetArg,
+    doorFlippedArg
   ) =>
     isInDoorSwing(
       x,
@@ -147,7 +149,8 @@ export default function RoomDesigner() {
       roomWArg,
       roomHArg,
       polygonArg,
-      doorOffsetArg
+      doorOffsetArg,
+      doorFlippedArg
     );
 
   // ------------------ EFFECT: SCALE POLYGON ------------------
@@ -173,7 +176,8 @@ export default function RoomDesigner() {
       polygon,
       doorSide,
       door,
-      doorOffset
+      doorOffset,
+      doorFlipped
     );
 
     setRacks(packed);
@@ -189,6 +193,7 @@ export default function RoomDesigner() {
     cableManagerPx,
     doorSide,
     doorOffset,
+    doorFlipped,
   ]);
 
   // ------------------ EFFECT: REPOSITION INVALID RACKS ------------------
@@ -211,7 +216,8 @@ export default function RoomDesigner() {
         door,
         roomW,
         roomH,
-        doorOffset
+        doorOffset,
+        doorFlipped
       );
 
       if (isValid) return rack;
@@ -241,7 +247,8 @@ export default function RoomDesigner() {
               door,
               roomW,
               roomH,
-              doorOffset
+              doorOffset,
+              doorFlipped
             )
           ) {
             return { ...rack, x: testX, y: testY };
@@ -269,7 +276,8 @@ export default function RoomDesigner() {
               door,
               roomW,
               roomH,
-              doorOffset
+              doorOffset,
+              doorFlipped
             )
           ) {
             return { ...rack, x: testX, y: testY };
@@ -628,7 +636,8 @@ export default function RoomDesigner() {
       door,
       roomW,
       roomH,
-      doorOffset
+      doorOffset,
+      doorFlipped
     );
 
     if (!valid) return;
@@ -656,7 +665,8 @@ export default function RoomDesigner() {
         polygon,
         doorSide,
         door,
-        doorOffset
+        doorOffset,
+        doorFlipped
       );
       setRacks(packed);
     }, 0);
@@ -797,6 +807,8 @@ export default function RoomDesigner() {
           roomLength={roomLength}
           setRoomWidth={setRoomWidth}
           setRoomLength={setRoomLength}
+          doorFlipped={doorFlipped}
+          setDoorFlipped={setDoorFlipped}
           numRacks={numRacks}
           setNumRacks={setNumRacks}
           numRows={numRows}
@@ -1005,7 +1017,8 @@ export default function RoomDesigner() {
                   door,
                   roomW,
                   roomH,
-                  doorOffset
+                  doorOffset,
+                  doorFlipped
                 );
                 if (!g) return null;
 

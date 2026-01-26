@@ -290,6 +290,16 @@ export function ControlsPanel(props) {
             style={inputStyle}
           />
         </label>
+
+        <label style={{ display: "flex", alignItems: "center", marginBottom: 8 }}>
+          <input
+            type="checkbox"
+            checked={props.doorFlipped}
+            onChange={(e) => props.setDoorFlipped(e.target.checked)}
+            style={{ marginRight: 10 }}
+          />
+          Flip door swing direction
+        </label>
       </div>
 
       {/* View Options */}
