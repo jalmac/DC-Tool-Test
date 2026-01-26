@@ -116,8 +116,8 @@ export default function RoomDesigner() {
   const offsetY = (PREVIEW_H - roomH * scaleToFit) / 2;
 
   const door = {
-    width: 1 * scale,
-    leaf: 1 * scale,
+    width: 1.5 * scale,
+    leaf: 1.5 * scale,
   };
 
   // ------------------ HELPERS ------------------
