@@ -173,7 +173,7 @@ export function computeDoorGeometry(
   const gapStart = [doorX - gx, doorY - gy];
   const gapEnd = [doorX + gx, doorY + gy];
 
-  const leafAngle = angle - Math.PI / 2;
+  const leafAngle = angle - Math.PI / 4;
   const leaf = [
     gapStart[0],
     gapStart[1],
