@@ -298,7 +298,7 @@ export function ControlsPanel(props) {
             onChange={(e) => props.setDoorFlipped(e.target.checked)}
             style={{ marginRight: 10 }}
           />
-          Flip door swing direction
+          Door swings outward
         </label>
 
         <label style={{ display: "flex", alignItems: "center", marginBottom: 8 }}>
@@ -308,7 +308,7 @@ export function ControlsPanel(props) {
             onChange={(e) => props.setDoorHingeRight(e.target.checked)}
             style={{ marginRight: 10 }}
           />
-          Door opens from right side
+          Hinge on right side
         </label>
       </div>
 
