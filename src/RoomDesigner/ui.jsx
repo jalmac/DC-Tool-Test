@@ -70,7 +70,7 @@ export function ControlsPanel(props) {
             Width:
             <input
               type="number"
-              step={0.01}
+              step={0.5}
               min={0.2}
               value={props.acWidth || ""}
               onChange={(e) =>
@@ -88,7 +88,7 @@ export function ControlsPanel(props) {
             Height:
             <input
               type="number"
-              step={0.01}
+              step={0.5}
               min={0.2}
               value={props.acHeight || ""}
               onChange={(e) =>
@@ -339,7 +339,7 @@ export function ControlsPanel(props) {
           Rack Width:
           <input
             type="number"
-            step={0.01}
+            step={0.5}
             value={props.rackWidth}
             onChange={(e) => props.setRackWidth(Number(e.target.value))}
             style={inputStyle}
@@ -350,7 +350,7 @@ export function ControlsPanel(props) {
           Rack Depth:
           <input
             type="number"
-            step={0.01}
+            step={0.5}
             value={props.rackDepth}
             onChange={(e) => props.setRackDepth(Number(e.target.value))}
             style={inputStyle}
@@ -380,7 +380,7 @@ export function ControlsPanel(props) {
           Width:
           <input
             type="number"
-            step={0.01}
+            step={0.5}
             min={0.01}
             value={props.cableManagerWidth}
             onChange={(e) =>
