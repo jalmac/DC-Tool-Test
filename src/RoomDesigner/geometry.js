@@ -175,8 +175,15 @@ export function computeDoorGeometry(
   const gapStart = [doorX - gx, doorY - gy];
   const gapEnd = [doorX + gx, doorY + gy];
 
-  const leafAngle = doorFlipped ? angle + Math.PI / 4 : angle - Math.PI / 4;
+  // Calculate leaf angle based on flip and hinge side
+  let leafAngle = doorFlipped ? angle + Math.PI / 4 : angle - Math.PI / 4;
+
+  // If hinge is on right, use the other end and flip the angle to the opposite side
   const hingePoint = doorHingeRight ? gapEnd : gapStart;
+  if (doorHingeRight) {
+    leafAngle = doorFlipped ? angle - Math.PI / 4 : angle + Math.PI / 4;
+  }
+
   const leaf = [
     hingePoint[0],
     hingePoint[1],
