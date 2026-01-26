@@ -290,6 +290,11 @@ export function ControlsPanel(props) {
             style={inputStyle}
           />
         </label>
+      </div>
+
+      {/* Door Options */}
+      <div style={{ marginBottom: 22 }}>
+        <h3 style={headingStyle}>Door Options</h3>
 
         <label style={{ display: "flex", alignItems: "center", marginBottom: 8 }}>
           <input

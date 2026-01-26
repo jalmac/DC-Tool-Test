@@ -83,6 +83,7 @@ export default function RoomDesigner() {
   const [snapToRacks, setSnapToRacks] = useState(true);
   const [showGrid, setShowGrid] = useState(false);
   const [racks, setRacks] = useState([]);
+  const [selectedRacks, setSelectedRacks] = useState([]);
 
   const [acUnits, setAcUnits] = useState([]);
   const [selectedAC, setSelectedAC] = useState(null);
@@ -579,13 +580,17 @@ export default function RoomDesigner() {
     let x = (canvasX - offsetX) / scaleToFit;
     let y = (canvasY - offsetY) / scaleToFit;
 
+    const originalRack = racks[index];
+    const isGroupDrag = selectedRacks.includes(index) && selectedRacks.length > 1;
+
     // Rack-to-rack snapping
     const SNAP_THRESHOLD = 20; // pixels in room space
     const ALIGNMENT_THRESHOLD = 15; // for Y-axis alignment
 
-    // Check proximity to other racks
+    // Check proximity to other racks (excluding selected racks)
     racks.forEach((otherRack, otherIndex) => {
       if (otherIndex === index) return; // Skip self
+      if (selectedRacks.includes(otherIndex)) return; // Skip other selected racks
 
       // Snap to Y-axis alignment (same row)
       const yDiff = Math.abs(y - otherRack.y);
@@ -624,6 +629,7 @@ export default function RoomDesigner() {
       // Only use grid snap if we didn't already snap to another rack
       const didRackSnap = racks.some((r, i) => {
         if (i === index) return false;
+        if (selectedRacks.includes(i)) return false; // Skip selected racks
         return Math.abs(y - r.y) < 1; // Check if we snapped to Y
       });
       if (!didRackSnap) {
@@ -651,9 +657,43 @@ export default function RoomDesigner() {
 
     if (!valid) return;
 
-    setRacks((prev) =>
-      prev.map((r, i) => (i === index ? { ...r, x, y } : r))
-    );
+    // If group drag, move all selected racks by the same offset
+    if (isGroupDrag) {
+      const deltaX = x - originalRack.x;
+      const deltaY = y - originalRack.y;
+
+      setRacks((prev) =>
+        prev.map((r, i) => {
+          if (selectedRacks.includes(i)) {
+            const newX = r.x + deltaX;
+            const newY = r.y + deltaY;
+            // Validate each rack's new position
+            const isValid = rackPositionIsValid(
+              newX,
+              newY,
+              rackW,
+              rackD,
+              polygon,
+              rackInsidePoly,
+              rackDoorBlocked,
+              doorSide,
+              door,
+              roomW,
+              roomH,
+              doorOffset,
+              doorFlipped,
+              doorHingeRight
+            );
+            return isValid ? { ...r, x: newX, y: newY } : r;
+          }
+          return r;
+        })
+      );
+    } else {
+      setRacks((prev) =>
+        prev.map((r, i) => (i === index ? { ...r, x, y } : r))
+      );
+    }
   }
 
   function resetRacks() {
@@ -971,6 +1011,7 @@ export default function RoomDesigner() {
                 setSelectedCamera(null);
                 setSelectedUPS(null);
                 setSelectedLabel(null);
+                setSelectedRacks([]);
               }
             }}
           >
@@ -1083,6 +1124,7 @@ export default function RoomDesigner() {
               {racks.map((rk, i) => {
                 const x = rk.x * scaleToFit + offsetX;
                 const y = rk.y * scaleToFit + offsetY;
+                const isSelected = selectedRacks.includes(i);
 
                 return (
                   <Group
@@ -1093,13 +1135,26 @@ export default function RoomDesigner() {
                     onDragEnd={(e) =>
                       onRackDragEnd(i, e.target.x(), e.target.y())
                     }
+                    onClick={(e) => {
+                      if (e.evt.ctrlKey || e.evt.metaKey) {
+                        // CTRL+click: toggle selection
+                        setSelectedRacks((prev) =>
+                          prev.includes(i)
+                            ? prev.filter((idx) => idx !== i)
+                            : [...prev, i]
+                        );
+                      } else {
+                        // Regular click: select only this rack
+                        setSelectedRacks([i]);
+                      }
+                    }}
                   >
                     <Rect
                       width={rackW * scaleToFit}
                       height={rackD * scaleToFit}
-                      fill="#e8f1fb"
-                      stroke="#1976d2"
-                      strokeWidth={2}
+                      fill={isSelected ? "#d0e7ff" : "#e8f1fb"}
+                      stroke={isSelected ? "#ff6b00" : "#1976d2"}
+                      strokeWidth={isSelected ? 3 : 2}
                       cornerRadius={6}
                     />
                     <Text
