@@ -294,8 +294,8 @@ export default function RoomDesigner() {
     const px = (canvasX - offsetX) / scaleToFit;
     const py = (canvasY - offsetY) / scaleToFit;
 
-    const widthPx = 3 * scale;
-    const heightPx = 1 * scale;
+    const widthPx = 2 * scale;
+    const heightPx = 0.5 * scale;
 
     const ac = {
       id: Date.now() + Math.random(),
