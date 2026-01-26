@@ -177,13 +177,13 @@ export function computeDoorGeometry(
 
   // doorFlipped controls whether door swings in or out of the room
   // doorHingeRight controls which end of the gap has the hinge
-  // When hinge is on the right, mirror the swing direction
   let leafAngle;
   if (doorHingeRight) {
-    // Right hinge - mirror the angle
-    leafAngle = doorFlipped ? angle - Math.PI / 4 : angle + Math.PI / 4;
+    // Right hinge - door swings to the left (opposite direction)
+    // Need to rotate 135° (3π/4) instead of 45° (π/4)
+    leafAngle = doorFlipped ? angle - 3 * Math.PI / 4 : angle + 3 * Math.PI / 4;
   } else {
-    // Left hinge - normal angle
+    // Left hinge - door swings to the right
     leafAngle = doorFlipped ? angle + Math.PI / 4 : angle - Math.PI / 4;
   }
 
