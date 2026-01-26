@@ -50,9 +50,9 @@ export default function RoomDesigner() {
 
   // ------------------ CORE STATE ------------------
 
-  const [unit, setUnit] = useState("feet");
-  const [roomWidth, setRoomWidth] = useState(40);
-  const [roomLength, setRoomLength] = useState(25);
+  const [unit, setUnit] = useState("meters");
+  const [roomWidth, setRoomWidth] = useState(7);
+  const [roomLength, setRoomLength] = useState(4);
 
   const [polygon, setPolygon] = useState(
     scalePolygon(
@@ -62,8 +62,8 @@ export default function RoomDesigner() {
         [60, 30],
         [0, 30],
       ],
-      40 * UNIT_SCALES.feet,
-      25 * UNIT_SCALES.feet
+      7 * UNIT_SCALES.meters,
+      4 * UNIT_SCALES.meters
     )
   );
 
@@ -74,8 +74,8 @@ export default function RoomDesigner() {
 
   const [numRacks, setNumRacks] = useState(4);
   const [numRows, setNumRows] = useState(1);
-  const [rackWidthPhysical, setRackWidthPhysical] = useState(2);
-  const [rackDepthPhysical, setRackDepthPhysical] = useState(4);
+  const [rackWidthPhysical, setRackWidthPhysical] = useState(1.5);
+  const [rackDepthPhysical, setRackDepthPhysical] = useState(2);
   const [showCableManagers, setShowCableManagers] = useState(false);
   const [cableManagerWidth, setCableManagerWidth] = useState(0.2);
   const [snapToRacks, setSnapToRacks] = useState(true);
@@ -116,8 +116,8 @@ export default function RoomDesigner() {
   const offsetY = (PREVIEW_H - roomH * scaleToFit) / 2;
 
   const door = {
-    width: 3 * scale,
-    leaf: 3 * scale,
+    width: 1 * scale,
+    leaf: 1 * scale,
   };
 
   // ------------------ HELPERS ------------------
