@@ -37,7 +37,8 @@ export function autoPackRacks(
   doorSide,
   door,
   doorOffset,
-  doorFlipped = false
+  doorFlipped = false,
+  doorHingeRight = false
 ) {
   const results = [];
   const racksPerRow = Math.ceil(numRacks / numRows);
@@ -85,7 +86,8 @@ export function autoPackRacks(
           roomH,
           polygon,
           doorOffset,
-          doorFlipped
+          doorFlipped,
+          doorHingeRight
         )
       ) {
         continue;
@@ -157,7 +159,8 @@ export function rackPositionIsValid(
   roomW,
   roomH,
   doorOffset,
-  doorFlipped = false
+  doorFlipped = false,
+  doorHingeRight = false
 ) {
   if (!insidePoly(x, y, rackW, rackD, polygon)) return false;
 
@@ -173,7 +176,8 @@ export function rackPositionIsValid(
       roomH,
       polygon,
       doorOffset,
-      doorFlipped
+      doorFlipped,
+      doorHingeRight
     )
   ) {
     return false;

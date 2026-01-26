@@ -300,6 +300,16 @@ export function ControlsPanel(props) {
           />
           Flip door swing direction
         </label>
+
+        <label style={{ display: "flex", alignItems: "center", marginBottom: 8 }}>
+          <input
+            type="checkbox"
+            checked={props.doorHingeRight}
+            onChange={(e) => props.setDoorHingeRight(e.target.checked)}
+            style={{ marginRight: 10 }}
+          />
+          Door opens from right side
+        </label>
       </div>
 
       {/* View Options */}

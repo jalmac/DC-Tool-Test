@@ -72,6 +72,7 @@ export default function RoomDesigner() {
   const [doorSide, setDoorSide] = useState("top");
   const [doorOffset, setDoorOffset] = useState(50);
   const [doorFlipped, setDoorFlipped] = useState(false);
+  const [doorHingeRight, setDoorHingeRight] = useState(false);
 
   const [numRacks, setNumRacks] = useState(2);
   const [numRows, setNumRows] = useState(1);
@@ -137,7 +138,8 @@ export default function RoomDesigner() {
     roomHArg,
     polygonArg,
     doorOffsetArg,
-    doorFlippedArg
+    doorFlippedArg,
+    doorHingeRightArg
   ) =>
     isInDoorSwing(
       x,
@@ -150,7 +152,8 @@ export default function RoomDesigner() {
       roomHArg,
       polygonArg,
       doorOffsetArg,
-      doorFlippedArg
+      doorFlippedArg,
+      doorHingeRightArg
     );
 
   // ------------------ EFFECT: SCALE POLYGON ------------------
@@ -177,7 +180,8 @@ export default function RoomDesigner() {
       doorSide,
       door,
       doorOffset,
-      doorFlipped
+      doorFlipped,
+      doorHingeRight
     );
 
     setRacks(packed);
@@ -194,6 +198,7 @@ export default function RoomDesigner() {
     doorSide,
     doorOffset,
     doorFlipped,
+    doorHingeRight,
   ]);
 
   // ------------------ EFFECT: REPOSITION INVALID RACKS ------------------
@@ -217,7 +222,8 @@ export default function RoomDesigner() {
         roomW,
         roomH,
         doorOffset,
-        doorFlipped
+        doorFlipped,
+        doorHingeRight
       );
 
       if (isValid) return rack;
@@ -248,7 +254,8 @@ export default function RoomDesigner() {
               roomW,
               roomH,
               doorOffset,
-              doorFlipped
+              doorFlipped,
+              doorHingeRight
             )
           ) {
             return { ...rack, x: testX, y: testY };
@@ -277,7 +284,8 @@ export default function RoomDesigner() {
               roomW,
               roomH,
               doorOffset,
-              doorFlipped
+              doorFlipped,
+              doorHingeRight
             )
           ) {
             return { ...rack, x: testX, y: testY };
@@ -637,7 +645,8 @@ export default function RoomDesigner() {
       roomW,
       roomH,
       doorOffset,
-      doorFlipped
+      doorFlipped,
+      doorHingeRight
     );
 
     if (!valid) return;
@@ -666,7 +675,8 @@ export default function RoomDesigner() {
         doorSide,
         door,
         doorOffset,
-        doorFlipped
+        doorFlipped,
+        doorHingeRight
       );
       setRacks(packed);
     }, 0);
@@ -809,6 +819,8 @@ export default function RoomDesigner() {
           setRoomLength={setRoomLength}
           doorFlipped={doorFlipped}
           setDoorFlipped={setDoorFlipped}
+          doorHingeRight={doorHingeRight}
+          setDoorHingeRight={setDoorHingeRight}
           numRacks={numRacks}
           setNumRacks={setNumRacks}
           numRows={numRows}
@@ -1018,7 +1030,8 @@ export default function RoomDesigner() {
                   roomW,
                   roomH,
                   doorOffset,
-                  doorFlipped
+                  doorFlipped,
+                  doorHingeRight
                 );
                 if (!g) return null;
 
