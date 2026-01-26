@@ -605,35 +605,41 @@ export default function RoomDesigner() {
     const isGroupDrag = selectedRacks.includes(index) && selectedRacks.length > 1;
 
     // Rack-to-rack snapping with increased thresholds
-    const SNAP_THRESHOLD = 40; // pixels in room space (increased from 20)
-    const ALIGNMENT_THRESHOLD = 30; // for Y-axis alignment (increased from 15)
+    const SNAP_THRESHOLD = 50; // pixels in room space for horizontal snapping
+    const Y_SNAP_RANGE = 100; // Allow snapping even if racks are further apart vertically
+
+    let snapped = false;
 
     // Check proximity to other racks (excluding selected racks)
     racks.forEach((otherRack, otherIndex) => {
       if (otherIndex === index) return; // Skip self
       if (selectedRacks.includes(otherIndex)) return; // Skip other selected racks
+      if (snapped) return; // Already snapped to another rack
 
-      // Snap to Y-axis alignment (same row)
       const yDiff = Math.abs(y - otherRack.y);
-      if (yDiff < ALIGNMENT_THRESHOLD) {
-        y = otherRack.y;
-      }
 
       // Snap to right side of other rack (with cable manager space if enabled)
       const cableSpace = showCableManagers ? cableManagerPx : 0;
       const rightSnapX = otherRack.x + rackW + cableSpace;
       const xDiffRight = Math.abs(x - rightSnapX);
-      if (xDiffRight < SNAP_THRESHOLD && yDiff < ALIGNMENT_THRESHOLD) {
+
+      // Only check if Y positions are somewhat close (within range)
+      if (xDiffRight < SNAP_THRESHOLD && yDiff < Y_SNAP_RANGE) {
         x = rightSnapX;
-        y = otherRack.y; // Force Y alignment when snapping horizontally
+        y = otherRack.y; // ALWAYS force perfect Y alignment when snapping horizontally
+        snapped = true;
+        return;
       }
 
       // Snap to left side of other rack
       const leftSnapX = otherRack.x - rackW - cableSpace;
       const xDiffLeft = Math.abs(x - leftSnapX);
-      if (xDiffLeft < SNAP_THRESHOLD && yDiff < ALIGNMENT_THRESHOLD) {
+
+      if (xDiffLeft < SNAP_THRESHOLD && yDiff < Y_SNAP_RANGE) {
         x = leftSnapX;
-        y = otherRack.y; // Force Y alignment when snapping horizontally
+        y = otherRack.y; // ALWAYS force perfect Y alignment when snapping horizontally
+        snapped = true;
+        return;
       }
     });
 
