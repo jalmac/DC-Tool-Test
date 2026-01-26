@@ -196,10 +196,6 @@ export default function RoomDesigner() {
     rackD,
     showCableManagers,
     cableManagerPx,
-    doorSide,
-    doorOffset,
-    doorFlipped,
-    doorHingeRight,
   ]);
 
   // ------------------ EFFECT: REPOSITION INVALID RACKS ------------------
@@ -643,9 +639,9 @@ export default function RoomDesigner() {
       }
     });
 
-    // Grid snapping (existing functionality)
-    if (snapToRacks && racks.length > 0) {
-      const snapped = snapRackToGrid(
+    // Grid snapping (existing functionality) - only if rack-to-rack snap didn't work
+    if (!snapped && snapToRacks && racks.length > 0) {
+      const gridSnap = snapRackToGrid(
         index,
         racks,
         rackW,
@@ -655,16 +651,8 @@ export default function RoomDesigner() {
         numRacks,
         numRows
       );
-      // Only use grid snap if we didn't already snap to another rack
-      const didRackSnap = racks.some((r, i) => {
-        if (i === index) return false;
-        if (selectedRacks.includes(i)) return false; // Skip selected racks
-        return Math.abs(y - r.y) < 1; // Check if we snapped to Y
-      });
-      if (!didRackSnap) {
-        x = snapped.x;
-        y = snapped.y;
-      }
+      x = gridSnap.x;
+      y = gridSnap.y;
     }
 
     const valid = rackPositionIsValid(
@@ -1184,9 +1172,9 @@ export default function RoomDesigner() {
                     <Rect
                       width={rackW * scaleToFit}
                       height={rackD * scaleToFit}
-                      fill={isSelected ? "#d0e7ff" : "#e8f1fb"}
-                      stroke={isSelected ? "#ff6b00" : "#1976d2"}
-                      strokeWidth={isSelected ? 3 : 2}
+                      fill={isSelected && !exporting ? "#d0e7ff" : "#e8f1fb"}
+                      stroke={isSelected && !exporting ? "#ff6b00" : "#1976d2"}
+                      strokeWidth={isSelected && !exporting ? 3 : 2}
                       cornerRadius={6}
                     />
                     <Text
