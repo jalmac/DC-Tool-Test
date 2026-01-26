@@ -574,7 +574,28 @@ export default function RoomDesigner() {
     setMeasurementStart(null);
   }
 
-  // ------------------ RACK DRAG END ------------------
+  // ------------------ RACK DRAG HANDLERS ------------------
+
+  function onRackDragMove(index, canvasX, canvasY) {
+    // If this rack is part of a group selection, move all selected racks together
+    if (selectedRacks.includes(index) && selectedRacks.length > 1) {
+      const originalRack = racks[index];
+      const newX = (canvasX - offsetX) / scaleToFit;
+      const newY = (canvasY - offsetY) / scaleToFit;
+
+      const deltaX = newX - originalRack.x;
+      const deltaY = newY - originalRack.y;
+
+      setRacks((prev) =>
+        prev.map((r, i) => {
+          if (selectedRacks.includes(i)) {
+            return { ...r, x: r.x + deltaX, y: r.y + deltaY };
+          }
+          return r;
+        })
+      );
+    }
+  }
 
   function onRackDragEnd(index, canvasX, canvasY) {
     let x = (canvasX - offsetX) / scaleToFit;
@@ -583,9 +604,9 @@ export default function RoomDesigner() {
     const originalRack = racks[index];
     const isGroupDrag = selectedRacks.includes(index) && selectedRacks.length > 1;
 
-    // Rack-to-rack snapping
-    const SNAP_THRESHOLD = 20; // pixels in room space
-    const ALIGNMENT_THRESHOLD = 15; // for Y-axis alignment
+    // Rack-to-rack snapping with increased thresholds
+    const SNAP_THRESHOLD = 40; // pixels in room space (increased from 20)
+    const ALIGNMENT_THRESHOLD = 30; // for Y-axis alignment (increased from 15)
 
     // Check proximity to other racks (excluding selected racks)
     racks.forEach((otherRack, otherIndex) => {
@@ -604,6 +625,7 @@ export default function RoomDesigner() {
       const xDiffRight = Math.abs(x - rightSnapX);
       if (xDiffRight < SNAP_THRESHOLD && yDiff < ALIGNMENT_THRESHOLD) {
         x = rightSnapX;
+        y = otherRack.y; // Force Y alignment when snapping horizontally
       }
 
       // Snap to left side of other rack
@@ -611,6 +633,7 @@ export default function RoomDesigner() {
       const xDiffLeft = Math.abs(x - leftSnapX);
       if (xDiffLeft < SNAP_THRESHOLD && yDiff < ALIGNMENT_THRESHOLD) {
         x = leftSnapX;
+        y = otherRack.y; // Force Y alignment when snapping horizontally
       }
     });
 
@@ -1132,6 +1155,9 @@ export default function RoomDesigner() {
                     x={x}
                     y={y}
                     draggable={!exporting}
+                    onDragMove={(e) =>
+                      onRackDragMove(i, e.target.x(), e.target.y())
+                    }
                     onDragEnd={(e) =>
                       onRackDragEnd(i, e.target.x(), e.target.y())
                     }
