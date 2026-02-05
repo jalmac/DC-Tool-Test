@@ -588,8 +588,9 @@ export default function RoomDesigner() {
     // If this rack is part of a group selection, move all selected racks together
     if (selectedRacks.includes(index) && selectedRacks.length > 1) {
       const originalRack = racks[index];
-      const newX = (canvasX - offsetX) / scaleToFit;
-      const newY = (canvasY - offsetY) / scaleToFit;
+      // Adjust for center pivot offset
+      const newX = (canvasX - offsetX - (rackW * scaleToFit / 2)) / scaleToFit;
+      const newY = (canvasY - offsetY - (rackD * scaleToFit / 2)) / scaleToFit;
 
       const deltaX = newX - originalRack.x;
       const deltaY = newY - originalRack.y;
@@ -606,8 +607,9 @@ export default function RoomDesigner() {
   }
 
   function onRackDragEnd(index, canvasX, canvasY) {
-    let x = (canvasX - offsetX) / scaleToFit;
-    let y = (canvasY - offsetY) / scaleToFit;
+    // Adjust for center pivot offset
+    let x = (canvasX - offsetX - (rackW * scaleToFit / 2)) / scaleToFit;
+    let y = (canvasY - offsetY - (rackD * scaleToFit / 2)) / scaleToFit;
 
     const originalRack = racks[index];
     const isGroupDrag = selectedRacks.includes(index) && selectedRacks.length > 1;
@@ -1156,8 +1158,9 @@ export default function RoomDesigner() {
 
               {/* RACKS */}
               {racks.map((rk, i) => {
-                const x = rk.x * scaleToFit + offsetX;
-                const y = rk.y * scaleToFit + offsetY;
+                // Add half width/height to position since we're using center pivot for rotation
+                const x = rk.x * scaleToFit + offsetX + (rackW * scaleToFit / 2);
+                const y = rk.y * scaleToFit + offsetY + (rackD * scaleToFit / 2);
                 const isSelected = selectedRacks.includes(i);
 
                 return (
