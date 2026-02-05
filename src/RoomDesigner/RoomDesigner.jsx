@@ -1217,23 +1217,17 @@ export default function RoomDesigner() {
                       strokeWidth={isSelected && !exporting ? 3 : 2}
                       cornerRadius={6}
                     />
-                    <Group
-                      x={0}
-                      y={0}
-                      rotation={-(rk.rotation || 0)}
-                    >
-                      <Text
-                        x={-rackW * scaleToFit / 2}
-                        y={-rackD * scaleToFit / 2}
-                        text={rk.label}
-                        width={rackW * scaleToFit}
-                        height={rackD * scaleToFit}
-                        align="center"
-                        verticalAlign="middle"
-                        fill="#003a66"
-                        fontSize={12}
-                      />
-                    </Group>
+                    <Text
+                      x={-rackW * scaleToFit / 2}
+                      y={-rackD * scaleToFit / 2}
+                      text={rk.label}
+                      width={rackW * scaleToFit}
+                      height={rackD * scaleToFit}
+                      align="center"
+                      verticalAlign="middle"
+                      fill="#003a66"
+                      fontSize={12}
+                    />
                   </Group>
                 );
               })}
