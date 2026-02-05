@@ -588,9 +588,10 @@ export default function RoomDesigner() {
     // If this rack is part of a group selection, move all selected racks together
     if (selectedRacks.includes(index) && selectedRacks.length > 1) {
       const originalRack = racks[index];
-      // Convert canvas position back to logical position (no offset adjustment needed with negative offsets)
-      const newX = (canvasX - offsetX) / scaleToFit;
-      const newY = (canvasY - offsetY) / scaleToFit;
+      // canvasX, canvasY is the center position (due to offsetX/Y)
+      // Convert to top-left, then to logical coords
+      const newX = (canvasX - offsetX - (rackW * scaleToFit / 2)) / scaleToFit;
+      const newY = (canvasY - offsetY - (rackD * scaleToFit / 2)) / scaleToFit;
 
       const deltaX = newX - originalRack.x;
       const deltaY = newY - originalRack.y;
@@ -607,9 +608,10 @@ export default function RoomDesigner() {
   }
 
   function onRackDragEnd(index, canvasX, canvasY) {
-    // Convert canvas position back to logical position (no offset adjustment needed with negative offsets)
-    let x = (canvasX - offsetX) / scaleToFit;
-    let y = (canvasY - offsetY) / scaleToFit;
+    // canvasX, canvasY is the center position (due to offsetX/Y)
+    // Convert to top-left, then to logical coords
+    let x = (canvasX - offsetX - (rackW * scaleToFit / 2)) / scaleToFit;
+    let y = (canvasY - offsetY - (rackD * scaleToFit / 2)) / scaleToFit;
 
     const originalRack = racks[index];
     const isGroupDrag = selectedRacks.includes(index) && selectedRacks.length > 1;
@@ -1158,19 +1160,22 @@ export default function RoomDesigner() {
 
               {/* RACKS */}
               {racks.map((rk, i) => {
-                // Position at top-left corner, use negative offset for center-pivot rotation
-                const x = rk.x * scaleToFit + offsetX;
-                const y = rk.y * scaleToFit + offsetY;
+                // Standard Konva center-pivot approach:
+                // - offset sets anchor at center (affects both position reference AND rotation pivot)
+                // - So x,y must be center position (not top-left)
+                // - Children draw from negative half-dimensions (relative to center anchor)
+                const centerX = (rk.x + rackW / 2) * scaleToFit + offsetX;
+                const centerY = (rk.y + rackD / 2) * scaleToFit + offsetY;
                 const isSelected = selectedRacks.includes(i);
 
                 return (
                   <Group
                     key={i}
-                    x={x}
-                    y={y}
+                    x={centerX}
+                    y={centerY}
                     rotation={rk.rotation || 0}
-                    offsetX={-rackW * scaleToFit / 2}
-                    offsetY={-rackD * scaleToFit / 2}
+                    offsetX={rackW * scaleToFit / 2}
+                    offsetY={rackD * scaleToFit / 2}
                     draggable={!exporting}
                     onDragMove={(e) =>
                       onRackDragMove(i, e.target.x(), e.target.y())
@@ -1193,8 +1198,8 @@ export default function RoomDesigner() {
                     }}
                   >
                     <Rect
-                      x={0}
-                      y={0}
+                      x={-rackW * scaleToFit / 2}
+                      y={-rackD * scaleToFit / 2}
                       width={rackW * scaleToFit}
                       height={rackD * scaleToFit}
                       fill={isSelected && !exporting ? "#d0e7ff" : "#e8f1fb"}
@@ -1203,8 +1208,8 @@ export default function RoomDesigner() {
                       cornerRadius={6}
                     />
                     <Text
-                      x={0}
-                      y={0}
+                      x={-rackW * scaleToFit / 2}
+                      y={-rackD * scaleToFit / 2}
                       text={rk.label}
                       width={rackW * scaleToFit}
                       height={rackD * scaleToFit}
