@@ -573,13 +573,50 @@ export default function RoomDesigner() {
   // ------------------ RACK ROTATION ------------------
 
   function rotateSelectedRacks() {
-    setRacks((prev) =>
-      prev.map((r, i) =>
+    setRacks((prev) => {
+      // First, rotate the selected racks
+      const rotated = prev.map((r, i) =>
         selectedRacks.includes(i)
           ? { ...r, rotation: (r.rotation || 0) + 90 }
           : r
-      )
-    );
+      );
+
+      // Then adjust positions to prevent overlapping
+      // Sort selected racks by x position (left to right)
+      const selectedIndices = [...selectedRacks].sort((a, b) => prev[a].x - prev[b].x);
+
+      if (selectedIndices.length > 1) {
+        // Adjust positions for each selected rack after the first
+        for (let i = 1; i < selectedIndices.length; i++) {
+          const currentIdx = selectedIndices[i];
+          const prevIdx = selectedIndices[i - 1];
+
+          const currentRack = rotated[currentIdx];
+          const prevRack = rotated[prevIdx];
+
+          // Calculate effective widths after rotation
+          const prevRotation = (prevRack.rotation || 0) % 360;
+          const prevIsRotated = prevRotation === 90 || prevRotation === 270;
+          const prevEffectiveW = prevIsRotated ? rackD : rackW;
+
+          const currentRotation = (currentRack.rotation || 0) % 360;
+          const currentIsRotated = currentRotation === 90 || currentRotation === 270;
+          const currentEffectiveW = currentIsRotated ? rackD : rackW;
+
+          const cableSpace = showCableManagers ? cableManagerPx : 0;
+
+          // Position current rack to the right of previous rack
+          const newX = prevRack.x + prevEffectiveW + cableSpace;
+
+          // Check if this position is valid and doesn't exceed room bounds
+          if (newX + currentEffectiveW <= roomW) {
+            rotated[currentIdx] = { ...currentRack, x: newX, y: prevRack.y };
+          }
+        }
+      }
+
+      return rotated;
+    });
   }
 
   // ------------------ RACK DRAG HANDLERS ------------------
