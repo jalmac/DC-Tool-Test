@@ -586,6 +586,11 @@ export default function RoomDesigner() {
       const selectedIndices = [...selectedRacks].sort((a, b) => prev[a].x - prev[b].x);
 
       if (selectedIndices.length > 1) {
+        // Check if racks are rotated to vertical orientation (90° or 270°)
+        const firstRack = rotated[selectedIndices[0]];
+        const firstRotation = (firstRack.rotation || 0) % 360;
+        const isVertical = firstRotation === 90 || firstRotation === 270;
+
         // Adjust positions for each selected rack after the first
         for (let i = 1; i < selectedIndices.length; i++) {
           const currentIdx = selectedIndices[i];
@@ -594,23 +599,35 @@ export default function RoomDesigner() {
           const currentRack = rotated[currentIdx];
           const prevRack = rotated[prevIdx];
 
-          // Calculate effective widths after rotation
+          // Calculate effective dimensions after rotation
           const prevRotation = (prevRack.rotation || 0) % 360;
           const prevIsRotated = prevRotation === 90 || prevRotation === 270;
           const prevEffectiveW = prevIsRotated ? rackD : rackW;
+          const prevEffectiveH = prevIsRotated ? rackW : rackD;
 
           const currentRotation = (currentRack.rotation || 0) % 360;
           const currentIsRotated = currentRotation === 90 || currentRotation === 270;
           const currentEffectiveW = currentIsRotated ? rackD : rackW;
+          const currentEffectiveH = currentIsRotated ? rackW : rackD;
 
           const cableSpace = showCableManagers ? cableManagerPx : 0;
 
-          // Position current rack to the right of previous rack
-          const newX = prevRack.x + prevEffectiveW + cableSpace;
+          if (isVertical) {
+            // Stack vertically (one below the other)
+            const newY = prevRack.y + prevEffectiveH + cableSpace;
 
-          // Check if this position is valid and doesn't exceed room bounds
-          if (newX + currentEffectiveW <= roomW) {
-            rotated[currentIdx] = { ...currentRack, x: newX, y: prevRack.y };
+            // Check if this position is valid and doesn't exceed room bounds
+            if (newY + currentEffectiveH <= roomH) {
+              rotated[currentIdx] = { ...currentRack, x: prevRack.x, y: newY };
+            }
+          } else {
+            // Position horizontally (side by side)
+            const newX = prevRack.x + prevEffectiveW + cableSpace;
+
+            // Check if this position is valid and doesn't exceed room bounds
+            if (newX + currentEffectiveW <= roomW) {
+              rotated[currentIdx] = { ...currentRack, x: newX, y: prevRack.y };
+            }
           }
         }
       }
