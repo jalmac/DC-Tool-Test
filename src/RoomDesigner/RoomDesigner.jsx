@@ -635,10 +635,9 @@ export default function RoomDesigner() {
       const currentIsRotated = currentRackRotation === 90 || currentRackRotation === 270;
       const otherIsRotated = otherRackRotation === 90 || otherRackRotation === 270;
 
+      // Only need effective width for horizontal snapping
       const currentEffectiveW = currentIsRotated ? rackD : rackW;
-      const currentEffectiveD = currentIsRotated ? rackW : rackD;
       const otherEffectiveW = otherIsRotated ? rackD : rackW;
-      const otherEffectiveD = otherIsRotated ? rackW : rackD;
 
       const yDiff = Math.abs(y - otherRack.y);
 
