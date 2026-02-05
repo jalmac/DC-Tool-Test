@@ -588,9 +588,9 @@ export default function RoomDesigner() {
     // If this rack is part of a group selection, move all selected racks together
     if (selectedRacks.includes(index) && selectedRacks.length > 1) {
       const originalRack = racks[index];
-      // Adjust for center pivot offset
-      const newX = (canvasX - offsetX - (rackW * scaleToFit / 2)) / scaleToFit;
-      const newY = (canvasY - offsetY - (rackD * scaleToFit / 2)) / scaleToFit;
+      // Convert canvas position back to logical position (no offset adjustment needed with negative offsets)
+      const newX = (canvasX - offsetX) / scaleToFit;
+      const newY = (canvasY - offsetY) / scaleToFit;
 
       const deltaX = newX - originalRack.x;
       const deltaY = newY - originalRack.y;
@@ -607,9 +607,9 @@ export default function RoomDesigner() {
   }
 
   function onRackDragEnd(index, canvasX, canvasY) {
-    // Adjust for center pivot offset
-    let x = (canvasX - offsetX - (rackW * scaleToFit / 2)) / scaleToFit;
-    let y = (canvasY - offsetY - (rackD * scaleToFit / 2)) / scaleToFit;
+    // Convert canvas position back to logical position (no offset adjustment needed with negative offsets)
+    let x = (canvasX - offsetX) / scaleToFit;
+    let y = (canvasY - offsetY) / scaleToFit;
 
     const originalRack = racks[index];
     const isGroupDrag = selectedRacks.includes(index) && selectedRacks.length > 1;
@@ -1158,9 +1158,9 @@ export default function RoomDesigner() {
 
               {/* RACKS */}
               {racks.map((rk, i) => {
-                // Add half width/height to position since we're using center pivot for rotation
-                const x = rk.x * scaleToFit + offsetX + (rackW * scaleToFit / 2);
-                const y = rk.y * scaleToFit + offsetY + (rackD * scaleToFit / 2);
+                // Position at top-left corner, use negative offset for center-pivot rotation
+                const x = rk.x * scaleToFit + offsetX;
+                const y = rk.y * scaleToFit + offsetY;
                 const isSelected = selectedRacks.includes(i);
 
                 return (
@@ -1169,8 +1169,8 @@ export default function RoomDesigner() {
                     x={x}
                     y={y}
                     rotation={rk.rotation || 0}
-                    offsetX={rackW * scaleToFit / 2}
-                    offsetY={rackD * scaleToFit / 2}
+                    offsetX={-rackW * scaleToFit / 2}
+                    offsetY={-rackD * scaleToFit / 2}
                     draggable={!exporting}
                     onDragMove={(e) =>
                       onRackDragMove(i, e.target.x(), e.target.y())
@@ -1193,8 +1193,8 @@ export default function RoomDesigner() {
                     }}
                   >
                     <Rect
-                      x={-rackW * scaleToFit / 2}
-                      y={-rackD * scaleToFit / 2}
+                      x={0}
+                      y={0}
                       width={rackW * scaleToFit}
                       height={rackD * scaleToFit}
                       fill={isSelected && !exporting ? "#d0e7ff" : "#e8f1fb"}
@@ -1203,8 +1203,8 @@ export default function RoomDesigner() {
                       cornerRadius={6}
                     />
                     <Text
-                      x={-rackW * scaleToFit / 2}
-                      y={-rackD * scaleToFit / 2}
+                      x={0}
+                      y={0}
                       text={rk.label}
                       width={rackW * scaleToFit}
                       height={rackD * scaleToFit}
