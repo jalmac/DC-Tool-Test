@@ -628,6 +628,18 @@ export default function RoomDesigner() {
       if (selectedRacks.includes(otherIndex)) return; // Skip other selected racks
       if (snapped) return; // Already snapped to another rack
 
+      // Account for rotation: when rotated 90° or 270°, width and depth swap
+      const currentRackRotation = (racks[index].rotation || 0) % 360;
+      const otherRackRotation = (otherRack.rotation || 0) % 360;
+
+      const currentIsRotated = currentRackRotation === 90 || currentRackRotation === 270;
+      const otherIsRotated = otherRackRotation === 90 || otherRackRotation === 270;
+
+      const currentEffectiveW = currentIsRotated ? rackD : rackW;
+      const currentEffectiveD = currentIsRotated ? rackW : rackD;
+      const otherEffectiveW = otherIsRotated ? rackD : rackW;
+      const otherEffectiveD = otherIsRotated ? rackW : rackD;
+
       const yDiff = Math.abs(y - otherRack.y);
 
       // IMPORTANT: Only snap horizontally if racks are already roughly aligned vertically
@@ -636,7 +648,7 @@ export default function RoomDesigner() {
       const cableSpace = showCableManagers ? cableManagerPx : 0;
 
       // Try to snap to right side of other rack
-      const rightSnapX = otherRack.x + rackW + cableSpace;
+      const rightSnapX = otherRack.x + otherEffectiveW + cableSpace;
       const xDiffRight = Math.abs(x - rightSnapX);
 
       if (xDiffRight < HORIZONTAL_SNAP_DISTANCE) {
@@ -647,7 +659,7 @@ export default function RoomDesigner() {
       }
 
       // Try to snap to left side of other rack
-      const leftSnapX = otherRack.x - rackW - cableSpace;
+      const leftSnapX = otherRack.x - currentEffectiveW - cableSpace;
       const xDiffLeft = Math.abs(x - leftSnapX);
 
       if (xDiffLeft < HORIZONTAL_SNAP_DISTANCE) {
