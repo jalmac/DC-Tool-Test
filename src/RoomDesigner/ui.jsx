@@ -336,6 +336,17 @@ export function ControlsPanel(props) {
       <div style={{ marginBottom: 22 }}>
         <h3 style={headingStyle}>Rack Settings</h3>
 
+        {props.selectedRacksCount > 0 && (
+          <div style={{ marginBottom: 12 }}>
+            <button
+              onClick={props.rotateSelectedRacks}
+              style={buttonStyle}
+            >
+              Rotate Selected Racks 90°
+            </button>
+          </div>
+        )}
+
         <label style={{ display: "block", marginBottom: 10 }}>
           Racks:
           <input

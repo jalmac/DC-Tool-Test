@@ -570,6 +570,18 @@ export default function RoomDesigner() {
     setMeasurementStart(null);
   }
 
+  // ------------------ RACK ROTATION ------------------
+
+  function rotateSelectedRacks() {
+    setRacks((prev) =>
+      prev.map((r, i) =>
+        selectedRacks.includes(i)
+          ? { ...r, rotation: (r.rotation || 0) + 90 }
+          : r
+      )
+    );
+  }
+
   // ------------------ RACK DRAG HANDLERS ------------------
 
   function onRackDragMove(index, canvasX, canvasY) {
@@ -933,6 +945,8 @@ export default function RoomDesigner() {
           exportJPG={exportJPG}
           exportPDF={exportPDF}
           resetRacks={resetRacks}
+          selectedRacksCount={selectedRacks.length}
+          rotateSelectedRacks={rotateSelectedRacks}
         />
       </div>
 
@@ -1151,6 +1165,9 @@ export default function RoomDesigner() {
                     key={i}
                     x={x}
                     y={y}
+                    rotation={rk.rotation || 0}
+                    offsetX={rackW * scaleToFit / 2}
+                    offsetY={rackD * scaleToFit / 2}
                     draggable={!exporting}
                     onDragMove={(e) =>
                       onRackDragMove(i, e.target.x(), e.target.y())
@@ -1173,6 +1190,8 @@ export default function RoomDesigner() {
                     }}
                   >
                     <Rect
+                      x={-rackW * scaleToFit / 2}
+                      y={-rackD * scaleToFit / 2}
                       width={rackW * scaleToFit}
                       height={rackD * scaleToFit}
                       fill={isSelected && !exporting ? "#d0e7ff" : "#e8f1fb"}
@@ -1181,6 +1200,8 @@ export default function RoomDesigner() {
                       cornerRadius={6}
                     />
                     <Text
+                      x={-rackW * scaleToFit / 2}
+                      y={-rackD * scaleToFit / 2}
                       text={rk.label}
                       width={rackW * scaleToFit}
                       height={rackD * scaleToFit}

@@ -97,6 +97,7 @@ export function autoPackRacks(
         x,
         y,
         label: `Rack\n${count + 1}`,
+        rotation: 0,
       });
 
       count++;
