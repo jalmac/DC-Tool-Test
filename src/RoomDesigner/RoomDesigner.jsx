@@ -588,10 +588,10 @@ export default function RoomDesigner() {
     // If this rack is part of a group selection, move all selected racks together
     if (selectedRacks.includes(index) && selectedRacks.length > 1) {
       const originalRack = racks[index];
-      // canvasX, canvasY is the center position (due to offsetX/Y)
-      // Convert to top-left, then to logical coords
-      const newX = (canvasX - offsetX - (rackW * scaleToFit / 2)) / scaleToFit;
-      const newY = (canvasY - offsetY - (rackD * scaleToFit / 2)) / scaleToFit;
+      // canvasX, canvasY is the center position (Group positioned at center)
+      // Convert to top-left logical coordinates
+      const newX = (canvasX - offsetX) / scaleToFit - rackW / 2;
+      const newY = (canvasY - offsetY) / scaleToFit - rackD / 2;
 
       const deltaX = newX - originalRack.x;
       const deltaY = newY - originalRack.y;
@@ -608,10 +608,10 @@ export default function RoomDesigner() {
   }
 
   function onRackDragEnd(index, canvasX, canvasY) {
-    // canvasX, canvasY is the center position (due to offsetX/Y)
-    // Convert to top-left, then to logical coords
-    let x = (canvasX - offsetX - (rackW * scaleToFit / 2)) / scaleToFit;
-    let y = (canvasY - offsetY - (rackD * scaleToFit / 2)) / scaleToFit;
+    // canvasX, canvasY is the center position (Group positioned at center)
+    // Convert to top-left logical coordinates
+    let x = (canvasX - offsetX) / scaleToFit - rackW / 2;
+    let y = (canvasY - offsetY) / scaleToFit - rackD / 2;
 
     const originalRack = racks[index];
     const isGroupDrag = selectedRacks.includes(index) && selectedRacks.length > 1;
@@ -1160,10 +1160,10 @@ export default function RoomDesigner() {
 
               {/* RACKS */}
               {racks.map((rk, i) => {
-                // Standard Konva center-pivot approach:
-                // - offset sets anchor at center (affects both position reference AND rotation pivot)
-                // - So x,y must be center position (not top-left)
-                // - Children draw from negative half-dimensions (relative to center anchor)
+                // Simple center-pivot rotation WITHOUT using Konva offsets:
+                // - Position Group at CENTER of rack
+                // - Draw children at negative half-dimensions from center
+                // - Rotation automatically pivots around Group's x,y (the center)
                 const centerX = (rk.x + rackW / 2) * scaleToFit + offsetX;
                 const centerY = (rk.y + rackD / 2) * scaleToFit + offsetY;
                 const isSelected = selectedRacks.includes(i);
@@ -1174,8 +1174,6 @@ export default function RoomDesigner() {
                     x={centerX}
                     y={centerY}
                     rotation={rk.rotation || 0}
-                    offsetX={rackW * scaleToFit / 2}
-                    offsetY={rackD * scaleToFit / 2}
                     draggable={!exporting}
                     onDragMove={(e) =>
                       onRackDragMove(i, e.target.x(), e.target.y())
