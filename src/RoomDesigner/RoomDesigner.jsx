@@ -1329,7 +1329,7 @@ export default function RoomDesigner() {
                   ? null // Use gradient for cooling racks
                   : (isSelected && !exporting ? "#d0e7ff" : "#e8f1fb");
                 const strokeColor = isCooling
-                  ? (isSelected && !exporting ? "#ff6b00" : "#00ffff")
+                  ? (isSelected && !exporting ? "#ff6b00" : "#0099cc")
                   : (isSelected && !exporting ? "#ff6b00" : "#1976d2");
 
                 return (
@@ -1371,8 +1371,8 @@ export default function RoomDesigner() {
                       stroke={strokeColor}
                       strokeWidth={isSelected && !exporting ? 3 : 2}
                       cornerRadius={6}
-                      shadowColor={isCooling && !exporting ? "#00ffff" : undefined}
-                      shadowBlur={isCooling && !exporting ? 15 : 0}
+                      shadowColor={isCooling && !exporting ? "#0099cc" : undefined}
+                      shadowBlur={isCooling && !exporting ? 5 : 0}
                       shadowEnabled={isCooling && !exporting}
                     />
 
