@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cooling Rack Design Options</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+      background: #f5f5f5;
+      padding: 40px;
+      margin: 0;
+    }
+    h1 {
+      text-align: center;
+      color: #333;
+      margin-bottom: 10px;
+    }
+    .subtitle {
+      text-align: center;
+      color: #666;
+      margin-bottom: 40px;
+    }
+    .designs {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 30px;
+      max-width: 1600px;
+      margin: 0 auto;
+    }
+    .design-card {
+      background: white;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .design-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+    }
+    .design-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: #333;
+      margin-bottom: 8px;
+    }
+    .design-description {
+      font-size: 13px;
+      color: #666;
+      margin-bottom: 16px;
+      line-height: 1.5;
+    }
+    canvas {
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      display: block;
+      width: 100%;
+      height: auto;
+    }
+    .current {
+      border: 3px solid #ff6b00;
+    }
+    .current .design-title::before {
+      content: "⭐ ";
+    }
+  </style>
+</head>
+<body>
+  <h1>Cooling Rack Design Options</h1>
+  <p class="subtitle">Click on any design card to enlarge</p>
+
+  <div class="designs">
+    <!-- Current Design -->
+    <div class="design-card current">
+      <div class="design-title">Current Design</div>
+      <div class="design-description">Light blue fill with horizontal arrows showing airflow direction</div>
+      <canvas id="current" width="250" height="180"></canvas>
+    </div>
+
+    <!-- Option 1 -->
+    <div class="design-card">
+      <div class="design-title">Option 1: Arctic Theme</div>
+      <div class="design-description">White-cyan gradient with vertical cold air arrows and snowflake icons</div>
+      <canvas id="option1" width="250" height="180"></canvas>
+    </div>
+
+    <!-- Option 2 -->
+    <div class="design-card">
+      <div class="design-title">Option 2: Industrial HVAC</div>
+      <div class="design-description">Dark metallic look with fan blade icons and riveted corners</div>
+      <canvas id="option2" width="250" height="180"></canvas>
+    </div>
+
+    <!-- Option 3 -->
+    <div class="design-card">
+      <div class="design-title">Option 3: Minimal Modern</div>
+      <div class="design-description">Transparent with dashed cyan border and central fan icon</div>
+      <canvas id="option3" width="250" height="180"></canvas>
+    </div>
+
+    <!-- Option 4 -->
+    <div class="design-card">
+      <div class="design-title">Option 4: Thermal Vision</div>
+      <div class="design-description">Blue-cyan gradient with wavy heat dissipation lines and glow effect</div>
+      <canvas id="option4" width="250" height="180"></canvas>
+    </div>
+
+    <!-- Option 5 -->
+    <div class="design-card">
+      <div class="design-title">Option 5: Data Center Standard</div>
+      <div class="design-description">Professional green theme with fan icons and clear labeling</div>
+      <canvas id="option5" width="250" height="180"></canvas>
+    </div>
+  </div>
+
+  <script>
+    // Helper to draw rounded rect
+    function roundRect(ctx, x, y, width, height, radius) {
+      ctx.beginPath();
+      ctx.moveTo(x + radius, y);
+      ctx.lineTo(x + width - radius, y);
+      ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+      ctx.lineTo(x + width, y + height - radius);
+      ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+      ctx.lineTo(x + radius, y + height);
+      ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+      ctx.lineTo(x, y + radius);
+      ctx.quadraticCurveTo(x, y, x + radius, y);
+      ctx.closePath();
+    }
+
+    // Current Design
+    const currentCanvas = document.getElementById('current');
+    const currentCtx = currentCanvas.getContext('2d');
+
+    // Background
+    currentCtx.fillStyle = '#d0ebff';
+    roundRect(currentCtx, 20, 20, 210, 140, 6);
+    currentCtx.fill();
+    currentCtx.strokeStyle = '#0066cc';
+    currentCtx.lineWidth = 2;
+    currentCtx.stroke();
+
+    // Horizontal arrows
+    currentCtx.strokeStyle = '#0066cc';
+    currentCtx.fillStyle = '#0066cc';
+    currentCtx.lineWidth = 2;
+
+    [0.25, 0.5, 0.75].forEach(fraction => {
+      const y = 20 + 140 * fraction;
+      // Arrow line
+      currentCtx.beginPath();
+      currentCtx.moveTo(35, y);
+      currentCtx.lineTo(215, y);
+      currentCtx.stroke();
+      // Arrow head
+      currentCtx.beginPath();
+      currentCtx.moveTo(215, y);
+      currentCtx.lineTo(209, y - 4);
+      currentCtx.lineTo(209, y + 4);
+      currentCtx.closePath();
+      currentCtx.fill();
+    });
+
+    // Label
+    currentCtx.fillStyle = '#003a66';
+    currentCtx.font = '12px Arial';
+    currentCtx.textAlign = 'center';
+    currentCtx.fillText('Rack 1', 125, 95);
+
+    // Option 1: Arctic Theme
+    const opt1Canvas = document.getElementById('option1');
+    const opt1Ctx = opt1Canvas.getContext('2d');
+
+    // Gradient background
+    const gradient1 = opt1Ctx.createLinearGradient(20, 20, 230, 20);
+    gradient1.addColorStop(0, '#ffffff');
+    gradient1.addColorStop(1, '#c3f0ff');
+    opt1Ctx.fillStyle = gradient1;
+    roundRect(opt1Ctx, 20, 20, 210, 140, 6);
+    opt1Ctx.fill();
+    opt1Ctx.strokeStyle = '#00a3cc';
+    opt1Ctx.lineWidth = 3;
+    opt1Ctx.stroke();
+
+    // Vertical arrows (cold air down)
+    opt1Ctx.strokeStyle = '#0088cc';
+    opt1Ctx.fillStyle = '#0088cc';
+    opt1Ctx.lineWidth = 2;
+
+    [0.3, 0.5, 0.7].forEach(fraction => {
+      const x = 20 + 210 * fraction;
+      // Arrow line
+      opt1Ctx.beginPath();
+      opt1Ctx.moveTo(x, 35);
+      opt1Ctx.lineTo(x, 145);
+      opt1Ctx.stroke();
+      // Arrow head (pointing down)
+      opt1Ctx.beginPath();
+      opt1Ctx.moveTo(x, 145);
+      opt1Ctx.lineTo(x - 4, 139);
+      opt1Ctx.lineTo(x + 4, 139);
+      opt1Ctx.closePath();
+      opt1Ctx.fill();
+    });
+
+    // Snowflakes
+    opt1Ctx.fillStyle = '#00a3cc';
+    opt1Ctx.font = '20px Arial';
+    opt1Ctx.textAlign = 'center';
+    opt1Ctx.fillText('❄', 60, 50);
+    opt1Ctx.fillText('❄', 190, 60);
+    opt1Ctx.fillText('❄', 125, 45);
+
+    // Label
+    opt1Ctx.fillStyle = '#006080';
+    opt1Ctx.font = '12px Arial';
+    opt1Ctx.fillText('Rack 1', 125, 95);
+
+    // Option 2: Industrial HVAC
+    const opt2Canvas = document.getElementById('option2');
+    const opt2Ctx = opt2Canvas.getContext('2d');
+
+    // Dark metallic background
+    opt2Ctx.fillStyle = '#4a5568';
+    roundRect(opt2Ctx, 20, 20, 210, 140, 6);
+    opt2Ctx.fill();
+    opt2Ctx.strokeStyle = '#a0aec0';
+    opt2Ctx.lineWidth = 3;
+    opt2Ctx.stroke();
+
+    // Rivets in corners
+    opt2Ctx.fillStyle = '#718096';
+    [25, 225].forEach(x => {
+      [25, 155].forEach(y => {
+        opt2Ctx.beginPath();
+        opt2Ctx.arc(x, y, 4, 0, Math.PI * 2);
+        opt2Ctx.fill();
+      });
+    });
+
+    // Cross-hatch pattern
+    opt2Ctx.strokeStyle = '#718096';
+    opt2Ctx.lineWidth = 1;
+    for (let i = 0; i < 8; i++) {
+      opt2Ctx.beginPath();
+      opt2Ctx.moveTo(40 + i * 25, 35);
+      opt2Ctx.lineTo(60 + i * 25, 145);
+      opt2Ctx.stroke();
+
+      opt2Ctx.beginPath();
+      opt2Ctx.moveTo(40 + i * 25, 145);
+      opt2Ctx.lineTo(60 + i * 25, 35);
+      opt2Ctx.stroke();
+    }
+
+    // Fan blade icon
+    opt2Ctx.fillStyle = '#cbd5e0';
+    opt2Ctx.strokeStyle = '#cbd5e0';
+    opt2Ctx.lineWidth = 2;
+    for (let i = 0; i < 4; i++) {
+      opt2Ctx.save();
+      opt2Ctx.translate(125, 90);
+      opt2Ctx.rotate((i * Math.PI) / 2);
+      opt2Ctx.beginPath();
+      opt2Ctx.ellipse(0, -20, 8, 20, 0, 0, Math.PI * 2);
+      opt2Ctx.fill();
+      opt2Ctx.restore();
+    }
+
+    // Center circle
+    opt2Ctx.fillStyle = '#2d3748';
+    opt2Ctx.beginPath();
+    opt2Ctx.arc(125, 90, 10, 0, Math.PI * 2);
+    opt2Ctx.fill();
+
+    // Label
+    opt2Ctx.fillStyle = '#e2e8f0';
+    opt2Ctx.font = '12px Arial';
+    opt2Ctx.textAlign = 'center';
+    opt2Ctx.fillText('Rack 1', 125, 135);
+
+    // Option 3: Minimal Modern
+    const opt3Canvas = document.getElementById('option3');
+    const opt3Ctx = opt3Canvas.getContext('2d');
+
+    // Transparent (no fill)
+    opt3Ctx.strokeStyle = '#00d9ff';
+    opt3Ctx.lineWidth = 4;
+    opt3Ctx.setLineDash([10, 5]);
+    roundRect(opt3Ctx, 20, 20, 210, 140, 8);
+    opt3Ctx.stroke();
+    opt3Ctx.setLineDash([]);
+
+    // Large circular arrow/fan in center
+    opt3Ctx.strokeStyle = '#00d9ff';
+    opt3Ctx.lineWidth = 3;
+    opt3Ctx.beginPath();
+    opt3Ctx.arc(125, 90, 35, 0, Math.PI * 1.7);
+    opt3Ctx.stroke();
+
+    // Arrow head
+    opt3Ctx.fillStyle = '#00d9ff';
+    opt3Ctx.beginPath();
+    opt3Ctx.moveTo(125, 55);
+    opt3Ctx.lineTo(120, 62);
+    opt3Ctx.lineTo(130, 62);
+    opt3Ctx.closePath();
+    opt3Ctx.fill();
+
+    // Fan blades (simple)
+    for (let i = 0; i < 3; i++) {
+      opt3Ctx.save();
+      opt3Ctx.translate(125, 90);
+      opt3Ctx.rotate((i * Math.PI * 2) / 3);
+      opt3Ctx.fillStyle = '#00d9ff';
+      opt3Ctx.fillRect(-3, -30, 6, 25);
+      opt3Ctx.restore();
+    }
+
+    // Label
+    opt3Ctx.fillStyle = '#00b8d9';
+    opt3Ctx.font = '12px Arial';
+    opt3Ctx.textAlign = 'center';
+    opt3Ctx.fillText('Rack 1', 125, 145);
+
+    // Option 4: Thermal Vision
+    const opt4Canvas = document.getElementById('option4');
+    const opt4Ctx = opt4Canvas.getContext('2d');
+
+    // Gradient from cold blue to warm cyan
+    const gradient4 = opt4Ctx.createLinearGradient(20, 20, 230, 160);
+    gradient4.addColorStop(0, '#0066ff');
+    gradient4.addColorStop(1, '#00ffff');
+    opt4Ctx.fillStyle = gradient4;
+    roundRect(opt4Ctx, 20, 20, 210, 140, 6);
+    opt4Ctx.fill();
+
+    // Glowing border
+    opt4Ctx.shadowColor = '#00ffff';
+    opt4Ctx.shadowBlur = 15;
+    opt4Ctx.strokeStyle = '#00ffff';
+    opt4Ctx.lineWidth = 3;
+    opt4Ctx.stroke();
+    opt4Ctx.shadowBlur = 0;
+
+    // Wavy heat dissipation lines
+    opt4Ctx.strokeStyle = 'rgba(255, 255, 255, 0.5)';
+    opt4Ctx.lineWidth = 2;
+    for (let i = 0; i < 4; i++) {
+      opt4Ctx.beginPath();
+      opt4Ctx.moveTo(40, 50 + i * 25);
+      for (let x = 40; x < 210; x += 10) {
+        const y = 50 + i * 25 + Math.sin((x + i * 20) / 10) * 5;
+        opt4Ctx.lineTo(x, y);
+      }
+      opt4Ctx.stroke();
+    }
+
+    // Temperature indicator
+    opt4Ctx.fillStyle = '#ffffff';
+    opt4Ctx.font = '24px Arial';
+    opt4Ctx.textAlign = 'center';
+    opt4Ctx.fillText('❄', 200, 45);
+
+    // Label
+    opt4Ctx.fillStyle = '#ffffff';
+    opt4Ctx.font = '12px Arial';
+    opt4Ctx.fillText('Rack 1', 125, 145);
+
+    // Option 5: Data Center Standard
+    const opt5Canvas = document.getElementById('option5');
+    const opt5Ctx = opt5Canvas.getContext('2d');
+
+    // Light green background
+    opt5Ctx.fillStyle = '#e0f2e9';
+    roundRect(opt5Ctx, 20, 20, 210, 140, 6);
+    opt5Ctx.fill();
+    opt5Ctx.strokeStyle = '#2e7d32';
+    opt5Ctx.lineWidth = 2;
+    opt5Ctx.stroke();
+
+    // Fan icons with rotation indicators
+    [60, 125, 190].forEach((x, idx) => {
+      // Fan blades
+      opt5Ctx.fillStyle = '#43a047';
+      for (let i = 0; i < 4; i++) {
+        opt5Ctx.save();
+        opt5Ctx.translate(x, 70);
+        opt5Ctx.rotate((i * Math.PI) / 2 + idx * 0.5);
+        opt5Ctx.beginPath();
+        opt5Ctx.ellipse(0, -12, 5, 12, 0, 0, Math.PI * 2);
+        opt5Ctx.fill();
+        opt5Ctx.restore();
+      }
+
+      // Center
+      opt5Ctx.fillStyle = '#1b5e20';
+      opt5Ctx.beginPath();
+      opt5Ctx.arc(x, 70, 6, 0, Math.PI * 2);
+      opt5Ctx.fill();
+    });
+
+    // "COOLING UNIT" label
+    opt5Ctx.fillStyle = '#1b5e20';
+    opt5Ctx.font = 'bold 11px Arial';
+    opt5Ctx.textAlign = 'center';
+    opt5Ctx.fillText('COOLING UNIT', 125, 110);
+
+    // Rack label
+    opt5Ctx.font = '12px Arial';
+    opt5Ctx.fillText('Rack 1', 125, 135);
+
+    // Add click handlers to enlarge
+    document.querySelectorAll('.design-card').forEach(card => {
+      card.addEventListener('click', function() {
+        const canvas = this.querySelector('canvas');
+        const modal = document.createElement('div');
+        modal.style.cssText = `
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background: rgba(0,0,0,0.8);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          z-index: 1000;
+          cursor: pointer;
+        `;
+
+        const enlarged = canvas.cloneNode(true);
+        enlarged.style.cssText = `
+          max-width: 90%;
+          max-height: 90%;
+          border: 3px solid white;
+          border-radius: 12px;
+        `;
+        enlarged.width = 500;
+        enlarged.height = 360;
+
+        // Redraw at larger size
+        const ctx = enlarged.getContext('2d');
+        ctx.scale(2, 2);
+        ctx.drawImage(canvas, 0, 0);
+
+        modal.appendChild(enlarged);
+        modal.addEventListener('click', () => modal.remove());
+        document.body.appendChild(modal);
+      });
+    });
+  </script>
+</body>
+</html>
