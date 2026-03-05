@@ -208,7 +208,8 @@ export default function RoomDesigner() {
       door,
       doorOffset,
       doorFlipped,
-      doorHingeRight
+      doorHingeRight,
+      racks // Pass existing racks to preserve their properties
     );
 
     setRacks(packed);
@@ -825,6 +826,7 @@ export default function RoomDesigner() {
 
   function resetRacks() {
     // Force repack by temporarily clearing racks, then setting new packed positions
+    // Don't pass existing racks to reset types and rotations
     setRacks([]);
     setTimeout(() => {
       const packed = autoPackRacks(
@@ -843,20 +845,33 @@ export default function RoomDesigner() {
         door,
         doorOffset,
         doorFlipped,
-        doorHingeRight
+        doorHingeRight,
+        [] // Pass empty array to reset all racks to default
       );
       setRacks(packed);
     }, 0);
   }
 
   function toggleRackType() {
-    setRacks((prev) =>
-      prev.map((r, i) =>
+    setRacks((prev) => {
+      // First, toggle the types
+      const toggled = prev.map((r, i) =>
         selectedRacks.includes(i)
           ? { ...r, type: r.type === "cooling" ? "server" : "cooling" }
           : r
-      )
-    );
+      );
+
+      // Then, renumber all server racks sequentially
+      let serverCount = 0;
+      return toggled.map((r) => {
+        if (r.type === "cooling") {
+          return { ...r, label: "" };
+        } else {
+          serverCount++;
+          return { ...r, label: `Rack\n${serverCount}` };
+        }
+      });
+    });
   }
 
   // ------------------ DOOR DRAG ------------------
