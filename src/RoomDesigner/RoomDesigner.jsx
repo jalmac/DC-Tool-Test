@@ -133,7 +133,7 @@ export default function RoomDesigner() {
   const rackD = rackDepthPhysical * scale;
   const cableManagerPx = cableManagerWidth * scale;
 
-  const scaleToFit = Math.min(stageSize.width / roomW, stageSize.height / roomH) * 0.9;
+  const scaleToFit = Math.min(stageSize.width / roomW, stageSize.height / roomH, 1);
 
   const offsetX = (stageSize.width - roomW * scaleToFit) / 2;
   const offsetY = (stageSize.height - roomH * scaleToFit) / 2;
