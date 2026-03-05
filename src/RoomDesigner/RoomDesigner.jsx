@@ -47,6 +47,26 @@ function clampRoom(v) {
 
 export default function RoomDesigner() {
   const stageRef = useRef(null);
+  const canvasContainerRef = useRef(null);
+  const [stageSize, setStageSize] = useState({ width: PREVIEW_W, height: PREVIEW_H });
+
+  // Resize observer to make canvas fill available space
+  useEffect(() => {
+    const el = canvasContainerRef.current;
+    if (!el) return;
+
+    const observer = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        const { width, height } = entry.contentRect;
+        if (width > 0 && height > 0) {
+          setStageSize({ width: Math.floor(width), height: Math.floor(height) });
+        }
+      }
+    });
+
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
 
   // ------------------ CORE STATE ------------------
 
@@ -113,10 +133,10 @@ export default function RoomDesigner() {
   const rackD = rackDepthPhysical * scale;
   const cableManagerPx = cableManagerWidth * scale;
 
-  const scaleToFit = Math.min(PREVIEW_W / roomW, PREVIEW_H / roomH, 1);
+  const scaleToFit = Math.min(stageSize.width / roomW, stageSize.height / roomH) * 0.9;
 
-  const offsetX = (PREVIEW_W - roomW * scaleToFit) / 2;
-  const offsetY = (PREVIEW_H - roomH * scaleToFit) / 2;
+  const offsetX = (stageSize.width - roomW * scaleToFit) / 2;
+  const offsetY = (stageSize.height - roomH * scaleToFit) / 2;
 
   const door = {
     width: 1.5 * scale,
@@ -948,7 +968,7 @@ export default function RoomDesigner() {
   // ------------------ RENDER ------------------
 
   return (
-    <div style={{ display: "flex", gap: 24 }}>
+    <div style={{ display: "flex", gap: 24, height: "calc(100vh - 80px)", minHeight: 0 }}>
       {/* LEFT SIDEBAR */}
       <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
         <ControlsPanel
@@ -1020,9 +1040,9 @@ export default function RoomDesigner() {
       </div>
 
       {/* RIGHT SIDE (Canvas + asset palette) */}
-      <div style={{ flex: 1, display: "flex", gap: 20 }}>
+      <div style={{ flex: 1, display: "flex", gap: 20, minHeight: 0 }}>
         {/* Canvas container */}
-        <div style={{ flex: 1 }}>
+        <div style={{ flex: 1, display: "flex", flexDirection: "column", minHeight: 0 }}>
         {/* Polygon edit toolbar */}
         <div
           style={{
@@ -1065,14 +1085,15 @@ export default function RoomDesigner() {
 
         {/* CANVAS BOX */}
         <div
+          ref={canvasContainerRef}
           style={{
             borderRadius: 12,
             background: "#ffffff",
             border: "1px solid #d5e1ef",
             boxShadow: "0 4px 10px rgba(0,0,0,0.06)",
-            padding: 16,
-            width: PREVIEW_W,
-            height: PREVIEW_H,
+            flex: 1,
+            minHeight: 500,
+            overflow: "hidden",
           }}
           onDragOver={(e) => e.preventDefault()}
           onDrop={(e) => {
@@ -1103,8 +1124,8 @@ export default function RoomDesigner() {
           }}
         >
           <Stage
-            width={PREVIEW_W}
-            height={PREVIEW_H}
+            width={stageSize.width}
+            height={stageSize.height}
             ref={stageRef}
             onMouseDown={(e) => {
               if (measurementMode) {
@@ -1125,11 +1146,11 @@ export default function RoomDesigner() {
                 const lines = [];
 
                 // Vertical lines - cover entire canvas width
-                for (let x = 0; x <= PREVIEW_W; x += gridSize) {
+                for (let x = 0; x <= stageSize.width; x += gridSize) {
                   lines.push(
                     <Line
                       key={`v-${x}`}
-                      points={[x, 0, x, PREVIEW_H]}
+                      points={[x, 0, x, stageSize.height]}
                       stroke="#cccccc"
                       strokeWidth={1}
                       dash={[5, 5]}
@@ -1138,11 +1159,11 @@ export default function RoomDesigner() {
                 }
 
                 // Horizontal lines - cover entire canvas height
-                for (let y = 0; y <= PREVIEW_H; y += gridSize) {
+                for (let y = 0; y <= stageSize.height; y += gridSize) {
                   lines.push(
                     <Line
                       key={`h-${y}`}
-                      points={[0, y, PREVIEW_W, y]}
+                      points={[0, y, stageSize.width, y]}
                       stroke="#cccccc"
                       strokeWidth={1}
                       dash={[5, 5]}
