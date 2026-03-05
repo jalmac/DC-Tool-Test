@@ -98,6 +98,7 @@ export function autoPackRacks(
         y,
         label: `Rack\n${count + 1}`,
         rotation: 0,
+        type: "server", // "server" or "cooling"
       });
 
       count++;

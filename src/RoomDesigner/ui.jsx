@@ -344,6 +344,12 @@ export function ControlsPanel(props) {
             >
               Rotate Selected Racks 90°
             </button>
+            <button
+              onClick={props.toggleRackType}
+              style={{ ...buttonStyle, marginTop: 8 }}
+            >
+              Toggle Cooling/Server Type
+            </button>
           </div>
         )}
 

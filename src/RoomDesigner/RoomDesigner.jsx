@@ -849,6 +849,16 @@ export default function RoomDesigner() {
     }, 0);
   }
 
+  function toggleRackType() {
+    setRacks((prev) =>
+      prev.map((r, i) =>
+        selectedRacks.includes(i)
+          ? { ...r, type: r.type === "cooling" ? "server" : "cooling" }
+          : r
+      )
+    );
+  }
+
   // ------------------ DOOR DRAG ------------------
 
   function handleDoorDragMove(e) {
@@ -1042,6 +1052,7 @@ export default function RoomDesigner() {
           resetRacks={resetRacks}
           selectedRacksCount={selectedRacks.length}
           rotateSelectedRacks={rotateSelectedRacks}
+          toggleRackType={toggleRackType}
         />
       </div>
 
@@ -1296,6 +1307,15 @@ export default function RoomDesigner() {
                 const centerX = (rk.x + rackW / 2) * scaleToFit + offsetX;
                 const centerY = (rk.y + rackD / 2) * scaleToFit + offsetY;
                 const isSelected = selectedRacks.includes(i);
+                const isCooling = rk.type === "cooling";
+
+                // Colors for cooling vs server racks
+                const fillColor = isCooling
+                  ? (isSelected && !exporting ? "#a3d5ff" : "#d0ebff")
+                  : (isSelected && !exporting ? "#d0e7ff" : "#e8f1fb");
+                const strokeColor = isCooling
+                  ? (isSelected && !exporting ? "#ff6b00" : "#0066cc")
+                  : (isSelected && !exporting ? "#ff6b00" : "#1976d2");
 
                 return (
                   <Group
@@ -1329,11 +1349,49 @@ export default function RoomDesigner() {
                       y={-rackD * scaleToFit / 2}
                       width={rackW * scaleToFit}
                       height={rackD * scaleToFit}
-                      fill={isSelected && !exporting ? "#d0e7ff" : "#e8f1fb"}
-                      stroke={isSelected && !exporting ? "#ff6b00" : "#1976d2"}
+                      fill={fillColor}
+                      stroke={strokeColor}
                       strokeWidth={isSelected && !exporting ? 3 : 2}
                       cornerRadius={6}
                     />
+
+                    {/* Airflow arrows for cooling racks */}
+                    {isCooling && (
+                      <>
+                        {/* Draw 3 horizontal airflow arrows */}
+                        {[0.25, 0.5, 0.75].map((fraction, idx) => {
+                          const arrowY = (-rackD * scaleToFit / 2) + (rackD * scaleToFit * fraction);
+                          const arrowStartX = -rackW * scaleToFit / 2 + 10;
+                          const arrowEndX = rackW * scaleToFit / 2 - 10;
+                          const arrowHeadSize = 6;
+
+                          return (
+                            <Group key={`arrow-${idx}`}>
+                              {/* Arrow line */}
+                              <Line
+                                points={[arrowStartX, arrowY, arrowEndX, arrowY]}
+                                stroke="#0066cc"
+                                strokeWidth={2}
+                              />
+                              {/* Arrow head (right pointing triangle) */}
+                              <Line
+                                points={[
+                                  arrowEndX, arrowY,
+                                  arrowEndX - arrowHeadSize, arrowY - arrowHeadSize / 2,
+                                  arrowEndX - arrowHeadSize, arrowY + arrowHeadSize / 2,
+                                  arrowEndX, arrowY
+                                ]}
+                                fill="#0066cc"
+                                stroke="#0066cc"
+                                strokeWidth={1}
+                                closed={true}
+                              />
+                            </Group>
+                          );
+                        })}
+                      </>
+                    )}
+
                     <Text
                       x={-rackW * scaleToFit / 2}
                       y={-rackD * scaleToFit / 2}
