@@ -1311,10 +1311,10 @@ export default function RoomDesigner() {
 
                 // Colors for cooling vs server racks
                 const fillColor = isCooling
-                  ? (isSelected && !exporting ? "#a3d5ff" : "#d0ebff")
+                  ? null // Use gradient for cooling racks
                   : (isSelected && !exporting ? "#d0e7ff" : "#e8f1fb");
                 const strokeColor = isCooling
-                  ? (isSelected && !exporting ? "#ff6b00" : "#0066cc")
+                  ? (isSelected && !exporting ? "#ff6b00" : "#00ffff")
                   : (isSelected && !exporting ? "#ff6b00" : "#1976d2");
 
                 return (
@@ -1350,45 +1350,54 @@ export default function RoomDesigner() {
                       width={rackW * scaleToFit}
                       height={rackD * scaleToFit}
                       fill={fillColor}
+                      fillLinearGradientStartPoint={isCooling ? { x: 0, y: 0 } : undefined}
+                      fillLinearGradientEndPoint={isCooling ? { x: rackW * scaleToFit, y: rackD * scaleToFit } : undefined}
+                      fillLinearGradientColorStops={isCooling ? [0, '#0066ff', 1, '#00ffff'] : undefined}
                       stroke={strokeColor}
                       strokeWidth={isSelected && !exporting ? 3 : 2}
                       cornerRadius={6}
+                      shadowColor={isCooling && !exporting ? "#00ffff" : undefined}
+                      shadowBlur={isCooling && !exporting ? 15 : 0}
+                      shadowEnabled={isCooling && !exporting}
                     />
 
-                    {/* Airflow arrows for cooling racks */}
+                    {/* Thermal vision wavy lines for cooling racks */}
                     {isCooling && (
                       <>
-                        {/* Draw 3 horizontal airflow arrows */}
-                        {[0.25, 0.5, 0.75].map((fraction, idx) => {
-                          const arrowY = (-rackD * scaleToFit / 2) + (rackD * scaleToFit * fraction);
-                          const arrowStartX = -rackW * scaleToFit / 2 + 10;
-                          const arrowEndX = rackW * scaleToFit / 2 - 10;
-                          const arrowHeadSize = 6;
+                        {/* Wavy heat dissipation lines */}
+                        {[0.25, 0.4, 0.55, 0.7].map((fraction, idx) => {
+                          const baseY = (-rackD * scaleToFit / 2) + (rackD * scaleToFit * fraction);
+                          const startX = -rackW * scaleToFit / 2 + 10;
+                          const endX = rackW * scaleToFit / 2 - 10;
+                          const points = [];
+
+                          // Create wavy line points
+                          const steps = 20;
+                          for (let step = 0; step <= steps; step++) {
+                            const x = startX + (endX - startX) * (step / steps);
+                            const waveOffset = Math.sin((step + idx * 4) * 0.5) * 3;
+                            points.push(x, baseY + waveOffset);
+                          }
 
                           return (
-                            <Group key={`arrow-${idx}`}>
-                              {/* Arrow line */}
-                              <Line
-                                points={[arrowStartX, arrowY, arrowEndX, arrowY]}
-                                stroke="#0066cc"
-                                strokeWidth={2}
-                              />
-                              {/* Arrow head (right pointing triangle) */}
-                              <Line
-                                points={[
-                                  arrowEndX, arrowY,
-                                  arrowEndX - arrowHeadSize, arrowY - arrowHeadSize / 2,
-                                  arrowEndX - arrowHeadSize, arrowY + arrowHeadSize / 2,
-                                  arrowEndX, arrowY
-                                ]}
-                                fill="#0066cc"
-                                stroke="#0066cc"
-                                strokeWidth={1}
-                                closed={true}
-                              />
-                            </Group>
+                            <Line
+                              key={`wave-${idx}`}
+                              points={points}
+                              stroke="rgba(255, 255, 255, 0.6)"
+                              strokeWidth={1.5}
+                              tension={0.3}
+                            />
                           );
                         })}
+
+                        {/* Temperature indicator icon (snowflake) */}
+                        <Text
+                          x={rackW * scaleToFit / 2 - 20}
+                          y={-rackD * scaleToFit / 2 + 5}
+                          text="❄"
+                          fontSize={16}
+                          fill="#ffffff"
+                        />
                       </>
                     )}
 
@@ -1400,7 +1409,7 @@ export default function RoomDesigner() {
                       height={rackD * scaleToFit}
                       align="center"
                       verticalAlign="middle"
-                      fill="#003a66"
+                      fill={isCooling ? "#ffffff" : "#003a66"}
                       fontSize={12}
                     />
                   </Group>
