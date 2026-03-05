@@ -187,6 +187,11 @@ export default function RoomDesigner() {
   // ------------------ EFFECT: AUTO-PACK RACKS ------------------
 
   useEffect(() => {
+    // Compute the up-to-date polygon for the current roomW/roomH.
+    // This avoids a race condition where the polygon state is stale when roomW/roomH
+    // changes at the same time (the scale-polygon effect runs concurrently).
+    const currentPoly = scalePolygon(polygon, roomW, roomH);
+
     const packed = autoPackRacks(
       numRacks,
       numRows,
@@ -198,7 +203,7 @@ export default function RoomDesigner() {
       cableManagerPx,
       rackInsidePoly,
       rackDoorBlocked,
-      polygon,
+      currentPoly,
       doorSide,
       door,
       doorOffset,
