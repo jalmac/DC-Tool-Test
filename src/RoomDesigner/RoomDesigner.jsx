@@ -104,6 +104,7 @@ export default function RoomDesigner() {
   const [showGrid, setShowGrid] = useState(false);
   const [racks, setRacks] = useState([]);
   const [selectedRacks, setSelectedRacks] = useState([]);
+  const [zoomLevel, setZoomLevel] = useState(1);
 
   const [acUnits, setAcUnits] = useState([]);
   const [selectedAC, setSelectedAC] = useState(null);
@@ -133,7 +134,7 @@ export default function RoomDesigner() {
   const rackD = rackDepthPhysical * scale;
   const cableManagerPx = cableManagerWidth * scale;
 
-  const scaleToFit = Math.min(stageSize.width / roomW, stageSize.height / roomH, 1);
+  const scaleToFit = Math.min(stageSize.width / roomW, stageSize.height / roomH, 1) * zoomLevel;
 
   const offsetX = (stageSize.width - roomW * scaleToFit) / 2;
   const offsetY = (stageSize.height - roomH * scaleToFit) / 2;
@@ -1094,6 +1095,7 @@ export default function RoomDesigner() {
             flex: 1,
             minHeight: 500,
             overflow: "hidden",
+            position: "relative",
           }}
           onDragOver={(e) => e.preventDefault()}
           onDrop={(e) => {
@@ -1123,6 +1125,42 @@ export default function RoomDesigner() {
             }
           }}
         >
+          {/* ZOOM CONTROLS */}
+          {!exporting && (
+            <div style={{
+              position: "absolute",
+              top: 12,
+              right: 12,
+              zIndex: 10,
+              display: "flex",
+              alignItems: "center",
+              gap: 6,
+              background: "rgba(255,255,255,0.9)",
+              border: "1px solid #b7cbe0",
+              borderRadius: 8,
+              padding: "4px 8px",
+              boxShadow: "0 2px 6px rgba(0,0,0,0.1)",
+            }}>
+              <button
+                onClick={() => setZoomLevel((z) => Math.max(0.25, +(z - 0.25).toFixed(2)))}
+                style={{ width: 28, height: 28, border: "none", background: "none", fontSize: 18, cursor: "pointer", color: "#003a66", lineHeight: 1 }}
+                title="Zoom out"
+              >−</button>
+              <span style={{ fontSize: 12, color: "#003a66", minWidth: 40, textAlign: "center", fontWeight: 600 }}>
+                {Math.round(zoomLevel * 100)}%
+              </span>
+              <button
+                onClick={() => setZoomLevel((z) => Math.min(4, +(z + 0.25).toFixed(2)))}
+                style={{ width: 28, height: 28, border: "none", background: "none", fontSize: 18, cursor: "pointer", color: "#003a66", lineHeight: 1 }}
+                title="Zoom in"
+              >+</button>
+              <button
+                onClick={() => setZoomLevel(1)}
+                style={{ fontSize: 11, border: "1px solid #b7cbe0", background: "#f4f8ff", borderRadius: 4, padding: "2px 6px", cursor: "pointer", color: "#003a66", marginLeft: 2 }}
+                title="Reset zoom"
+              >Reset</button>
+            </div>
+          )}
           <Stage
             width={stageSize.width}
             height={stageSize.height}
