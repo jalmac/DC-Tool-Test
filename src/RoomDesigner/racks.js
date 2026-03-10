@@ -118,10 +118,110 @@ export function autoPackRacks(
         label,
         rotation,
         type,
+        rowIndex: row,
+        columnIndex: col,
       });
 
       count++;
       if (count === numRacks) return results;
+    }
+  }
+
+  return results;
+}
+
+/**
+ * Generate racks with custom counts per row, preserving gaps from deleted racks.
+ * This allows configurations like [4, 3, 4] where middle row has fewer racks.
+ *
+ * @param {Array<number>} racksPerRowArray - Array of rack counts per row, e.g., [4, 3, 4]
+ * @param {number} roomW
+ * @param {number} roomH
+ * @param {number} rackW
+ * @param {number} rackD
+ * @param {boolean} showCableManagers
+ * @param {number} cableManagerPx
+ * @param {function} insidePoly
+ * @param {function} doorBlocked
+ * @param {Array<[number, number]>} polygon
+ * @param {string} doorSide
+ * @param {{width:number, leaf:number}} door
+ * @param {number} doorOffset
+ * @param {boolean} doorFlipped
+ * @param {boolean} doorHingeRight
+ * @param {Array<{x:number,y:number,label:string,type:string,rotation:number,rowIndex:number,columnIndex:number}>} existingRacks
+ * @param {number} startingNumber
+ * @returns {Array<{x:number,y:number,label:string,type:string,rotation:number,rowIndex:number,columnIndex:number}>}
+ */
+export function customLayoutRacks(
+  racksPerRowArray,
+  roomW,
+  roomH,
+  rackW,
+  rackD,
+  showCableManagers,
+  cableManagerPx,
+  insidePoly,
+  doorBlocked,
+  polygon,
+  doorSide,
+  door,
+  doorOffset,
+  doorFlipped = false,
+  doorHingeRight = false,
+  existingRacks = [],
+  startingNumber = 1
+) {
+  const results = [];
+  const numRows = racksPerRowArray.length;
+  const ROW_GAP = 48;
+
+  const totalHeight = numRows * rackD + (numRows - 1) * ROW_GAP;
+  const startY = Math.max((roomH - totalHeight) / 2, 0);
+
+  let globalIndex = 0;
+  let serverCount = startingNumber - 1;
+
+  for (let row = 0; row < numRows; row++) {
+    const racksInThisRow = racksPerRowArray[row];
+
+    const rowWidth =
+      racksInThisRow * rackW +
+      (racksInThisRow - 1) * (showCableManagers ? cableManagerPx : 0);
+
+    const startX = Math.max((roomW - rowWidth) / 2, 0);
+
+    for (let col = 0; col < racksInThisRow; col++) {
+      const x = startX + col * (rackW + (showCableManagers ? cableManagerPx : 0));
+      const y = startY + row * (rackD + ROW_GAP);
+
+      // Find existing rack at this position
+      const existingRack = existingRacks.find(
+        r => r.rowIndex === row && r.columnIndex === col
+      );
+
+      const type = existingRack?.type || "server";
+      const rotation = existingRack?.rotation || 0;
+
+      let label;
+      if (type === "cooling") {
+        label = "";
+      } else {
+        serverCount++;
+        label = `Rack\n${serverCount}`;
+      }
+
+      results.push({
+        x,
+        y,
+        label,
+        rotation,
+        type,
+        rowIndex: row,
+        columnIndex: col,
+      });
+
+      globalIndex++;
     }
   }
 

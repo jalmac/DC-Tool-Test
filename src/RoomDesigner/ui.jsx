@@ -425,6 +425,29 @@ export function ControlsPanel(props) {
           Start numbering from 0
         </label>
 
+        <label style={{ display: "flex", alignItems: "center", marginBottom: 8 }}>
+          <input
+            type="checkbox"
+            checked={props.useCustomLayout}
+            onChange={(e) => props.setUseCustomLayout(e.target.checked)}
+            style={{ marginRight: 10 }}
+          />
+          Custom layout (preserves gaps)
+        </label>
+
+        {props.useCustomLayout && (
+          <label style={{ display: "block", marginBottom: 10 }}>
+            Racks per row (e.g., "4, 3, 4"):
+            <input
+              type="text"
+              value={props.customRacksPerRow}
+              onChange={(e) => props.setCustomRacksPerRow(e.target.value)}
+              placeholder="e.g., 4, 3, 4"
+              style={{ ...inputStyle, width: "100%" }}
+            />
+          </label>
+        )}
+
         <button onClick={props.resetRacks} style={buttonStyle}>
           Reset Racks
         </button>

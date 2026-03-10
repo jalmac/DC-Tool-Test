@@ -17,6 +17,7 @@ import {
 
 import {
   autoPackRacks,
+  customLayoutRacks,
   snapRackToGrid,
   rackPositionIsValid,
 } from "./racks";
@@ -103,6 +104,8 @@ export default function RoomDesigner() {
   const [snapToRacks, setSnapToRacks] = useState(true);
   const [showGrid, setShowGrid] = useState(false);
   const [rackNumberingStartsAtZero, setRackNumberingStartsAtZero] = useState(false);
+  const [useCustomLayout, setUseCustomLayout] = useState(false);
+  const [customRacksPerRow, setCustomRacksPerRow] = useState(""); // e.g., "4, 3, 4"
   const [racks, setRacks] = useState([]);
   const [selectedRacks, setSelectedRacks] = useState([]);
   const [zoomLevel, setZoomLevel] = useState(1);
@@ -188,6 +191,9 @@ export default function RoomDesigner() {
   // ------------------ EFFECT: AUTO-PACK RACKS ------------------
 
   useEffect(() => {
+    // Skip auto-packing in custom layout mode
+    if (useCustomLayout) return;
+
     // Compute the up-to-date polygon for the current roomW/roomH.
     // This avoids a race condition where the polygon state is stale when roomW/roomH
     // changes at the same time (the scale-polygon effect runs concurrently).
@@ -219,6 +225,58 @@ export default function RoomDesigner() {
   }, [
     numRacks,
     numRows,
+    roomW,
+    roomH,
+    rackW,
+    rackD,
+    showCableManagers,
+    cableManagerPx,
+    rackNumberingStartsAtZero,
+    useCustomLayout,
+  ]);
+
+  // ------------------ EFFECT: CUSTOM LAYOUT RACKS ------------------
+
+  useEffect(() => {
+    if (!useCustomLayout || !customRacksPerRow) return;
+
+    // Parse the custom racks per row string (e.g., "4, 3, 4")
+    const racksPerRowArray = customRacksPerRow
+      .split(',')
+      .map(s => parseInt(s.trim()))
+      .filter(n => !isNaN(n) && n > 0);
+
+    if (racksPerRowArray.length === 0) return;
+
+    const currentPoly = scalePolygon(polygon, roomW, roomH);
+
+    const packed = customLayoutRacks(
+      racksPerRowArray,
+      roomW,
+      roomH,
+      rackW,
+      rackD,
+      showCableManagers,
+      cableManagerPx,
+      rackInsidePoly,
+      rackDoorBlocked,
+      currentPoly,
+      doorSide,
+      door,
+      doorOffset,
+      doorFlipped,
+      doorHingeRight,
+      racks, // Pass existing racks to preserve their properties
+      rackNumberingStartsAtZero ? 0 : 1
+    );
+
+    setRacks(packed);
+    setNumRows(racksPerRowArray.length);
+    setNumRacks(racksPerRowArray.reduce((sum, n) => sum + n, 0));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    useCustomLayout,
+    customRacksPerRow,
     roomW,
     roomH,
     rackW,
@@ -901,25 +959,89 @@ export default function RoomDesigner() {
   function deleteSelectedRacks() {
     if (selectedRacks.length === 0) return;
 
-    setRacks((prev) => {
-      // Filter out selected racks
-      const remaining = prev.filter((_, i) => !selectedRacks.includes(i));
+    if (useCustomLayout) {
+      // In custom layout mode, remove racks and update the configuration
+      setRacks((prev) => {
+        // Filter out selected racks
+        const remaining = prev.filter((_, i) => !selectedRacks.includes(i));
 
-      // Renumber all server racks sequentially
-      const startingNumber = rackNumberingStartsAtZero ? 0 : 1;
-      let serverCount = startingNumber - 1;
-      return remaining.map((r) => {
-        if (r.type === "cooling") {
-          return { ...r, label: "" };
-        } else {
-          serverCount++;
-          return { ...r, label: `Rack\n${serverCount}` };
-        }
+        // Count racks per row in the remaining racks
+        const rowCounts = {};
+        remaining.forEach((rack) => {
+          const row = rack.rowIndex;
+          rowCounts[row] = (rowCounts[row] || 0) + 1;
+        });
+
+        // Update the column indices for remaining racks in each row
+        const reindexed = {};
+        remaining.forEach((rack) => {
+          const row = rack.rowIndex;
+          if (!reindexed[row]) reindexed[row] = [];
+          reindexed[row].push(rack);
+        });
+
+        const result = [];
+        Object.keys(reindexed).forEach((row) => {
+          reindexed[row].forEach((rack, colIndex) => {
+            result.push({ ...rack, columnIndex: colIndex });
+          });
+        });
+
+        // Renumber all server racks sequentially
+        const startingNumber = rackNumberingStartsAtZero ? 0 : 1;
+        let serverCount = startingNumber - 1;
+        return result.map((r) => {
+          if (r.type === "cooling") {
+            return { ...r, label: "" };
+          } else {
+            serverCount++;
+            return { ...r, label: `Rack\n${serverCount}` };
+          }
+        });
       });
-    });
 
-    // Update numRacks to match the new count
-    setNumRacks((prev) => Math.max(1, prev - selectedRacks.length));
+      // Update the custom racks per row string
+      setRacks((prev) => {
+        const rowCounts = {};
+        prev.forEach((rack) => {
+          const row = rack.rowIndex;
+          rowCounts[row] = (rowCounts[row] || 0) + 1;
+        });
+
+        const maxRow = Math.max(...Object.keys(rowCounts).map(Number));
+        const countsArray = [];
+        for (let i = 0; i <= maxRow; i++) {
+          countsArray.push(rowCounts[i] || 0);
+        }
+
+        // Filter out rows with 0 racks
+        const nonZeroRows = countsArray.filter(c => c > 0);
+        setCustomRacksPerRow(nonZeroRows.join(', '));
+
+        return prev;
+      });
+    } else {
+      // In normal mode, just filter and renumber
+      setRacks((prev) => {
+        // Filter out selected racks
+        const remaining = prev.filter((_, i) => !selectedRacks.includes(i));
+
+        // Renumber all server racks sequentially
+        const startingNumber = rackNumberingStartsAtZero ? 0 : 1;
+        let serverCount = startingNumber - 1;
+        return remaining.map((r) => {
+          if (r.type === "cooling") {
+            return { ...r, label: "" };
+          } else {
+            serverCount++;
+            return { ...r, label: `Rack\n${serverCount}` };
+          }
+        });
+      });
+
+      // Update numRacks to match the new count
+      setNumRacks((prev) => Math.max(1, prev - selectedRacks.length));
+    }
 
     // Clear selection
     setSelectedRacks([]);
@@ -1122,6 +1244,10 @@ export default function RoomDesigner() {
           deleteSelectedRacks={deleteSelectedRacks}
           rackNumberingStartsAtZero={rackNumberingStartsAtZero}
           setRackNumberingStartsAtZero={setRackNumberingStartsAtZero}
+          useCustomLayout={useCustomLayout}
+          setUseCustomLayout={setUseCustomLayout}
+          customRacksPerRow={customRacksPerRow}
+          setCustomRacksPerRow={setCustomRacksPerRow}
         />
       </div>
 
