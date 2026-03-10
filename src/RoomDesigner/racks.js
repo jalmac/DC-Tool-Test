@@ -179,7 +179,6 @@ export function customLayoutRacks(
   const totalHeight = numRows * rackD + (numRows - 1) * ROW_GAP;
   const startY = Math.max((roomH - totalHeight) / 2, 0);
 
-  let globalIndex = 0;
   let serverCount = startingNumber - 1;
 
   for (let row = 0; row < numRows; row++) {
@@ -220,8 +219,6 @@ export function customLayoutRacks(
         rowIndex: row,
         columnIndex: col,
       });
-
-      globalIndex++;
     }
   }
 
