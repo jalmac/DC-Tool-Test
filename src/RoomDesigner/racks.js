@@ -21,6 +21,7 @@
  * @param {{width:number, leaf:number}} door
  * @param {number} doorOffset
  * @param {Array<{x:number,y:number,label:string,type:string,rotation:number}>} existingRacks - existing racks to preserve properties from
+ * @param {number} startingNumber - starting number for rack labels (0 or 1)
  * @returns {Array<{x:number,y:number,label:string}>}
  */
 export function autoPackRacks(
@@ -40,7 +41,8 @@ export function autoPackRacks(
   doorOffset,
   doorFlipped = false,
   doorHingeRight = false,
-  existingRacks = []
+  existingRacks = [],
+  startingNumber = 1
 ) {
   const results = [];
   const racksPerRow = Math.ceil(numRacks / numRows);
@@ -51,7 +53,7 @@ export function autoPackRacks(
   const startY = Math.max((roomH - totalHeight) / 2, 0);
 
   let count = 0;
-  let serverCount = 0; // Track server racks separately for numbering
+  let serverCount = startingNumber - 1; // Track server racks separately for numbering
 
   for (let row = 0; row < numRows; row++) {
     const racksInThisRow =

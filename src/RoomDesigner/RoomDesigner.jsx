@@ -102,6 +102,7 @@ export default function RoomDesigner() {
   const [cableManagerWidth, setCableManagerWidth] = useState(0.2);
   const [snapToRacks, setSnapToRacks] = useState(true);
   const [showGrid, setShowGrid] = useState(false);
+  const [rackNumberingStartsAtZero, setRackNumberingStartsAtZero] = useState(false);
   const [racks, setRacks] = useState([]);
   const [selectedRacks, setSelectedRacks] = useState([]);
   const [zoomLevel, setZoomLevel] = useState(1);
@@ -209,7 +210,8 @@ export default function RoomDesigner() {
       doorOffset,
       doorFlipped,
       doorHingeRight,
-      racks // Pass existing racks to preserve their properties
+      racks, // Pass existing racks to preserve their properties
+      rackNumberingStartsAtZero ? 0 : 1
     );
 
     setRacks(packed);
@@ -223,6 +225,7 @@ export default function RoomDesigner() {
     rackD,
     showCableManagers,
     cableManagerPx,
+    rackNumberingStartsAtZero,
   ]);
 
   // ------------------ EFFECT: REPOSITION INVALID RACKS ------------------
@@ -597,6 +600,25 @@ export default function RoomDesigner() {
     setMeasurementStart(null);
   }
 
+  // ------------------ KEYBOARD EVENT LISTENER ------------------
+
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      // Delete or Backspace key to delete selected racks
+      if ((e.key === "Delete" || e.key === "Backspace") && selectedRacks.length > 0) {
+        // Prevent default only if we're actually deleting racks
+        // (don't interfere with input fields)
+        if (document.activeElement.tagName !== "INPUT" && document.activeElement.tagName !== "TEXTAREA") {
+          e.preventDefault();
+          deleteSelectedRacks();
+        }
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [selectedRacks, rackNumberingStartsAtZero]); // eslint-disable-line react-hooks/exhaustive-deps
+
   // ------------------ RACK ROTATION ------------------
 
   function rotateSelectedRacks() {
@@ -846,7 +868,8 @@ export default function RoomDesigner() {
         doorOffset,
         doorFlipped,
         doorHingeRight,
-        [] // Pass empty array to reset all racks to default
+        [], // Pass empty array to reset all racks to default
+        rackNumberingStartsAtZero ? 0 : 1
       );
       setRacks(packed);
     }, 0);
@@ -862,7 +885,8 @@ export default function RoomDesigner() {
       );
 
       // Then, renumber all server racks sequentially
-      let serverCount = 0;
+      const startingNumber = rackNumberingStartsAtZero ? 0 : 1;
+      let serverCount = startingNumber - 1;
       return toggled.map((r) => {
         if (r.type === "cooling") {
           return { ...r, label: "" };
@@ -872,6 +896,33 @@ export default function RoomDesigner() {
         }
       });
     });
+  }
+
+  function deleteSelectedRacks() {
+    if (selectedRacks.length === 0) return;
+
+    setRacks((prev) => {
+      // Filter out selected racks
+      const remaining = prev.filter((_, i) => !selectedRacks.includes(i));
+
+      // Renumber all server racks sequentially
+      const startingNumber = rackNumberingStartsAtZero ? 0 : 1;
+      let serverCount = startingNumber - 1;
+      return remaining.map((r) => {
+        if (r.type === "cooling") {
+          return { ...r, label: "" };
+        } else {
+          serverCount++;
+          return { ...r, label: `Rack\n${serverCount}` };
+        }
+      });
+    });
+
+    // Update numRacks to match the new count
+    setNumRacks((prev) => Math.max(1, prev - selectedRacks.length));
+
+    // Clear selection
+    setSelectedRacks([]);
   }
 
   // ------------------ DOOR DRAG ------------------
@@ -1068,6 +1119,9 @@ export default function RoomDesigner() {
           selectedRacksCount={selectedRacks.length}
           rotateSelectedRacks={rotateSelectedRacks}
           toggleRackType={toggleRackType}
+          deleteSelectedRacks={deleteSelectedRacks}
+          rackNumberingStartsAtZero={rackNumberingStartsAtZero}
+          setRackNumberingStartsAtZero={setRackNumberingStartsAtZero}
         />
       </div>
 

@@ -350,6 +350,12 @@ export function ControlsPanel(props) {
             >
               Toggle Cooling/Server Type
             </button>
+            <button
+              onClick={props.deleteSelectedRacks}
+              style={{ ...buttonStyle, marginTop: 8, background: "#d32f2f" }}
+            >
+              Delete Selected Racks
+            </button>
           </div>
         )}
 
@@ -407,6 +413,16 @@ export function ControlsPanel(props) {
             style={{ marginRight: 10 }}
           />
           Snap racks to grid
+        </label>
+
+        <label style={{ display: "flex", alignItems: "center", marginBottom: 8 }}>
+          <input
+            type="checkbox"
+            checked={props.rackNumberingStartsAtZero}
+            onChange={(e) => props.setRackNumberingStartsAtZero(e.target.checked)}
+            style={{ marginRight: 10 }}
+          />
+          Start numbering from 0
         </label>
 
         <button onClick={props.resetRacks} style={buttonStyle}>
