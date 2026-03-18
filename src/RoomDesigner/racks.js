@@ -170,7 +170,8 @@ export function customLayoutRacks(
   doorFlipped = false,
   doorHingeRight = false,
   existingRacks = [],
-  startingNumber = 1
+  startingNumber = 1,
+  rightToLeft = false
 ) {
   const results = [];
   const numRows = racksPerRowArray.length;
@@ -190,11 +191,12 @@ export function customLayoutRacks(
 
     const startX = Math.max((roomW - rowWidth) / 2, 0);
 
+    // Collect all racks in this row first
+    const rowRacks = [];
     for (let col = 0; col < racksInThisRow; col++) {
       const x = startX + col * (rackW + (showCableManagers ? cableManagerPx : 0));
       const y = startY + row * (rackD + ROW_GAP);
 
-      // Find existing rack at this position
       const existingRack = existingRacks.find(
         r => r.rowIndex === row && r.columnIndex === col
       );
@@ -202,22 +204,46 @@ export function customLayoutRacks(
       const type = existingRack?.type || "server";
       const rotation = existingRack?.rotation || 0;
 
+      rowRacks.push({
+        x,
+        y,
+        type,
+        rotation,
+        rowIndex: row,
+        columnIndex: col,
+      });
+    }
+
+    // Count servers in this row and assign numbers
+    const serverIndices = rowRacks
+      .map((rack, idx) => (rack.type === "server" ? idx : -1))
+      .filter(idx => idx !== -1);
+
+    const serverNumbers = [];
+    for (let i = 0; i < serverIndices.length; i++) {
+      serverCount++;
+      serverNumbers.push(serverCount);
+    }
+
+    // If right to left, reverse the server numbers
+    if (rightToLeft) {
+      serverNumbers.reverse();
+    }
+
+    // Apply labels to racks
+    let serverIdx = 0;
+    for (const rack of rowRacks) {
       let label;
-      if (type === "cooling") {
+      if (rack.type === "cooling") {
         label = "";
       } else {
-        serverCount++;
-        label = `Rack\n${serverCount}`;
+        label = `Rack\n${serverNumbers[serverIdx]}`;
+        serverIdx++;
       }
 
       results.push({
-        x,
-        y,
+        ...rack,
         label,
-        rotation,
-        type,
-        rowIndex: row,
-        columnIndex: col,
       });
     }
   }

@@ -428,6 +428,16 @@ export function ControlsPanel(props) {
         <label style={{ display: "flex", alignItems: "center", marginBottom: 8 }}>
           <input
             type="checkbox"
+            checked={props.rackNumberingRightToLeft}
+            onChange={(e) => props.setRackNumberingRightToLeft(e.target.checked)}
+            style={{ marginRight: 10 }}
+          />
+          Number racks right to left
+        </label>
+
+        <label style={{ display: "flex", alignItems: "center", marginBottom: 8 }}>
+          <input
+            type="checkbox"
             checked={props.useCustomLayout}
             onChange={(e) => props.setUseCustomLayout(e.target.checked)}
             style={{ marginRight: 10 }}

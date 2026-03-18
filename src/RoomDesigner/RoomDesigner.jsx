@@ -104,6 +104,7 @@ export default function RoomDesigner() {
   const [snapToRacks, setSnapToRacks] = useState(true);
   const [showGrid, setShowGrid] = useState(false);
   const [rackNumberingStartsAtZero, setRackNumberingStartsAtZero] = useState(false);
+  const [rackNumberingRightToLeft, setRackNumberingRightToLeft] = useState(false);
   const [useCustomLayout, setUseCustomLayout] = useState(false);
   const [customRacksPerRow, setCustomRacksPerRow] = useState(""); // e.g., "4, 3, 4"
   const [racks, setRacks] = useState([]);
@@ -267,7 +268,8 @@ export default function RoomDesigner() {
       doorFlipped,
       doorHingeRight,
       racks, // Pass existing racks to preserve their properties
-      rackNumberingStartsAtZero ? 0 : 1
+      rackNumberingStartsAtZero ? 0 : 1,
+      rackNumberingRightToLeft
     );
 
     setRacks(packed);
@@ -284,6 +286,7 @@ export default function RoomDesigner() {
     showCableManagers,
     cableManagerPx,
     rackNumberingStartsAtZero,
+    rackNumberingRightToLeft,
   ]);
 
   // ------------------ EFFECT: REPOSITION INVALID RACKS ------------------
@@ -1244,6 +1247,8 @@ export default function RoomDesigner() {
           deleteSelectedRacks={deleteSelectedRacks}
           rackNumberingStartsAtZero={rackNumberingStartsAtZero}
           setRackNumberingStartsAtZero={setRackNumberingStartsAtZero}
+          rackNumberingRightToLeft={rackNumberingRightToLeft}
+          setRackNumberingRightToLeft={setRackNumberingRightToLeft}
           useCustomLayout={useCustomLayout}
           setUseCustomLayout={setUseCustomLayout}
           customRacksPerRow={customRacksPerRow}
