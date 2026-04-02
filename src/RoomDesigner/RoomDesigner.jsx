@@ -2135,11 +2135,9 @@ export default function RoomDesigner() {
                               y: Math.max(20, pos.y),
                             };
                           }}
-                          onDragEnd={(e) => {
-                            const node = e.target;
-                            const newW = node.x();
-                            const newH = node.y();
-                            // Convert from screen pixels to physical units
+                          onDragMove={(e) => {
+                            const newW = e.target.x();
+                            const newH = e.target.y();
                             updateAisleSize(
                               aisle.id,
                               newW / scaleToFit / scale,
@@ -2162,20 +2160,21 @@ export default function RoomDesigner() {
                               y: Math.max(20, pos.y),
                             };
                           }}
-                          onDragEnd={(e) => {
-                            const node = e.target;
-                            const deltaX = node.x();
-                            const newW = w - deltaX;
-                            const newH = node.y();
+                          onDragMove={(e) => {
+                            const deltaX = e.target.x();
+                            const newWPx = w - deltaX;
+                            const newHPx = e.target.y();
+
+                            const physicalDeltaX = deltaX / scaleToFit / scale;
 
                             setAisles((prev) =>
                               prev.map((a) =>
                                 a.id === aisle.id
                                   ? {
                                       ...a,
-                                      x: aisle.x + (deltaX / scaleToFit / scale),
-                                      width: newW / scaleToFit,
-                                      height: newH / scaleToFit,
+                                      x: aisle.x + physicalDeltaX,
+                                      width: newWPx / scaleToFit,
+                                      height: newHPx / scaleToFit,
                                     }
                                   : a
                               )
@@ -2197,20 +2196,21 @@ export default function RoomDesigner() {
                               y: Math.min(h - 20, pos.y),
                             };
                           }}
-                          onDragEnd={(e) => {
-                            const node = e.target;
-                            const deltaY = node.y();
-                            const newW = node.x();
-                            const newH = h - deltaY;
+                          onDragMove={(e) => {
+                            const deltaY = e.target.y();
+                            const newWPx = e.target.x();
+                            const newHPx = h - deltaY;
+
+                            const physicalDeltaY = deltaY / scaleToFit / scale;
 
                             setAisles((prev) =>
                               prev.map((a) =>
                                 a.id === aisle.id
                                   ? {
                                       ...a,
-                                      y: aisle.y + (deltaY / scaleToFit / scale),
-                                      width: newW / scaleToFit,
-                                      height: newH / scaleToFit,
+                                      y: aisle.y + physicalDeltaY,
+                                      width: newWPx / scaleToFit,
+                                      height: newHPx / scaleToFit,
                                     }
                                   : a
                               )
@@ -2232,22 +2232,24 @@ export default function RoomDesigner() {
                               y: Math.min(h - 20, pos.y),
                             };
                           }}
-                          onDragEnd={(e) => {
-                            const node = e.target;
-                            const deltaX = node.x();
-                            const deltaY = node.y();
-                            const newW = w - deltaX;
-                            const newH = h - deltaY;
+                          onDragMove={(e) => {
+                            const deltaX = e.target.x();
+                            const deltaY = e.target.y();
+                            const newWPx = w - deltaX;
+                            const newHPx = h - deltaY;
+
+                            const physicalDeltaX = deltaX / scaleToFit / scale;
+                            const physicalDeltaY = deltaY / scaleToFit / scale;
 
                             setAisles((prev) =>
                               prev.map((a) =>
                                 a.id === aisle.id
                                   ? {
                                       ...a,
-                                      x: aisle.x + (deltaX / scaleToFit / scale),
-                                      y: aisle.y + (deltaY / scaleToFit / scale),
-                                      width: newW / scaleToFit,
-                                      height: newH / scaleToFit,
+                                      x: aisle.x + physicalDeltaX,
+                                      y: aisle.y + physicalDeltaY,
+                                      width: newWPx / scaleToFit,
+                                      height: newHPx / scaleToFit,
                                     }
                                   : a
                               )
