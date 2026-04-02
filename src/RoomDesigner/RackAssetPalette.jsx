@@ -218,6 +218,107 @@ export default function RackAssetPalette() {
         </div>
       </div>
 
+      {/* Hot Aisle */}
+      <div
+        draggable
+        onDragStart={(e) => {
+          e.dataTransfer.setData("asset-type", "HotAisle");
+        }}
+        style={{
+          width: "100%",
+          border: "2px solid #d32f2f",
+          background: "#ffebee",
+          borderRadius: 10,
+          padding: "14px 10px",
+          textAlign: "center",
+          cursor: "grab",
+          boxShadow: "0 2px 6px rgba(0,0,0,0.06)",
+          transition: "box-shadow 0.2s ease",
+        }}
+        title="Drag between rack rows"
+      >
+        {/* Hot aisle icon - horizontal bars with heat waves */}
+        <svg
+          width="38"
+          height="38"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="#d32f2f"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          style={{ marginBottom: 6 }}
+        >
+          <rect x="2" y="10" width="20" height="4" fill="#d32f2f" opacity="0.3"></rect>
+          <path d="M6 4 Q 6 6, 6 8" strokeWidth="1.5"></path>
+          <path d="M12 4 Q 12 6, 12 8" strokeWidth="1.5"></path>
+          <path d="M18 4 Q 18 6, 18 8" strokeWidth="1.5"></path>
+        </svg>
+
+        <div
+          style={{
+            fontSize: 15,
+            fontWeight: 600,
+            color: "#c62828",
+            letterSpacing: 0.3,
+          }}
+        >
+          Hot Aisle
+        </div>
+      </div>
+
+      {/* Cold Aisle */}
+      <div
+        draggable
+        onDragStart={(e) => {
+          e.dataTransfer.setData("asset-type", "ColdAisle");
+        }}
+        style={{
+          width: "100%",
+          border: "2px solid #1976d2",
+          background: "#e3f2fd",
+          borderRadius: 10,
+          padding: "14px 10px",
+          textAlign: "center",
+          cursor: "grab",
+          boxShadow: "0 2px 6px rgba(0,0,0,0.06)",
+          transition: "box-shadow 0.2s ease",
+        }}
+        title="Drag between rack rows"
+      >
+        {/* Cold aisle icon - horizontal bars with snowflakes */}
+        <svg
+          width="38"
+          height="38"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="#1976d2"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          style={{ marginBottom: 6 }}
+        >
+          <rect x="2" y="10" width="20" height="4" fill="#1976d2" opacity="0.3"></rect>
+          <line x1="6" y1="4" x2="6" y2="8"></line>
+          <line x1="4" y1="6" x2="8" y2="6"></line>
+          <line x1="12" y1="4" x2="12" y2="8"></line>
+          <line x1="10" y1="6" x2="14" y2="6"></line>
+          <line x1="18" y1="4" x2="18" y2="8"></line>
+          <line x1="16" y1="6" x2="20" y2="6"></line>
+        </svg>
+
+        <div
+          style={{
+            fontSize: 15,
+            fontWeight: 600,
+            color: "#0d47a1",
+            letterSpacing: 0.3,
+          }}
+        >
+          Cold Aisle
+        </div>
+      </div>
+
       <div
         style={{
           fontSize: 12,

@@ -123,6 +123,9 @@ export default function RoomDesigner() {
   const [labels, setLabels] = useState([]);
   const [selectedLabel, setSelectedLabel] = useState(null);
 
+  const [aisles, setAisles] = useState([]);
+  const [selectedAisle, setSelectedAisle] = useState(null);
+
   const [measurements, setMeasurements] = useState([]);
   const [measurementMode, setMeasurementMode] = useState(false);
   const [measurementStart, setMeasurementStart] = useState(null);
@@ -609,6 +612,54 @@ export default function RoomDesigner() {
     setLabels((prev) =>
       prev.map((l) =>
         l.id === id ? { ...l, color } : l
+      )
+    );
+  }
+
+  // ------------------ AISLE FUNCTIONS ------------------
+
+  function addAisleCanvasCoords(canvasX, canvasY, aisleType) {
+    const px = (canvasX - offsetX) / scaleToFit;
+    const py = (canvasY - offsetY) / scaleToFit;
+
+    const widthPx = 8 * scale; // Default width: 8 meters/feet
+    const heightPx = 0.8 * scale; // Height: 0.8 meters/feet
+
+    const aisle = {
+      id: Date.now() + Math.random(),
+      x: px,
+      y: py,
+      width: widthPx,
+      height: heightPx,
+      type: aisleType, // "hot" or "cold"
+    };
+
+    setAisles((prev) => [...prev, aisle]);
+    setSelectedAisle(aisle.id);
+  }
+
+  function onAisleDragEnd(aisle, canvasX, canvasY) {
+    const px = (canvasX - offsetX) / scaleToFit;
+    const py = (canvasY - offsetY) / scaleToFit;
+
+    setAisles((prev) =>
+      prev.map((a) =>
+        a.id === aisle.id ? { ...a, x: px, y: py } : a
+      )
+    );
+  }
+
+  function deleteAisle(id) {
+    setAisles((prev) => prev.filter((a) => a.id !== id));
+    if (selectedAisle === id) setSelectedAisle(null);
+  }
+
+  function updateAisleSize(id, wPhysical, hPhysical) {
+    setAisles((prev) =>
+      prev.map((a) =>
+        a.id === id
+          ? { ...a, width: wPhysical * scale, height: hPhysical * scale }
+          : a
       )
     );
   }
@@ -1233,6 +1284,12 @@ export default function RoomDesigner() {
           updateLabelFontSize={updateLabelFontSize}
           updateLabelColor={updateLabelColor}
           deleteLabel={deleteLabel}
+          selectedAisle={selectedAisle}
+          aisleType={aisles.find((a) => a.id === selectedAisle)?.type || "hot"}
+          aisleWidth={aisles.find((a) => a.id === selectedAisle)?.width / scale || null}
+          aisleHeight={aisles.find((a) => a.id === selectedAisle)?.height / scale || null}
+          updateAisleSize={updateAisleSize}
+          deleteAisle={deleteAisle}
           measurementMode={measurementMode}
           toggleMeasurementMode={toggleMeasurementMode}
           measurementsCount={measurements.length}
@@ -1338,6 +1395,18 @@ export default function RoomDesigner() {
                 e.clientX - rect.left,
                 e.clientY - rect.top
               );
+            } else if (type === "HotAisle") {
+              addAisleCanvasCoords(
+                e.clientX - rect.left,
+                e.clientY - rect.top,
+                "hot"
+              );
+            } else if (type === "ColdAisle") {
+              addAisleCanvasCoords(
+                e.clientX - rect.left,
+                e.clientY - rect.top,
+                "cold"
+              );
             }
           }}
         >
@@ -1389,6 +1458,7 @@ export default function RoomDesigner() {
                 setSelectedCamera(null);
                 setSelectedUPS(null);
                 setSelectedLabel(null);
+                setSelectedAisle(null);
                 setSelectedRacks([]);
               }
             }}
@@ -1925,6 +1995,59 @@ export default function RoomDesigner() {
                     stroke={isSelected ? "#d32f2f" : "transparent"}
                     strokeWidth={isSelected ? 1 : 0}
                   />
+                );
+              })}
+
+              {/* AISLES (Hot/Cold) */}
+              {aisles.map((aisle) => {
+                const sx = aisle.x * scaleToFit + offsetX;
+                const sy = aisle.y * scaleToFit + offsetY;
+                const w = aisle.width * scaleToFit;
+                const h = aisle.height * scaleToFit;
+                const isSelected = selectedAisle === aisle.id;
+                const isHot = aisle.type === "hot";
+
+                return (
+                  <Group
+                    key={aisle.id}
+                    x={sx}
+                    y={sy}
+                    draggable={!exporting}
+                    onDragEnd={(e) =>
+                      onAisleDragEnd(aisle, e.target.x(), e.target.y())
+                    }
+                    onClick={() => {
+                      setSelectedAisle(aisle.id);
+                      setSelectedAC(null);
+                      setSelectedCamera(null);
+                      setSelectedUPS(null);
+                      setSelectedLabel(null);
+                    }}
+                  >
+                    {/* Aisle rectangle */}
+                    <Rect
+                      width={w}
+                      height={h}
+                      fill={isHot ? "#ffcdd2" : "#bbdefb"}
+                      stroke={isSelected ? "#000" : (isHot ? "#d32f2f" : "#1976d2")}
+                      strokeWidth={isSelected ? 3 : 2}
+                      opacity={0.6}
+                      cornerRadius={4}
+                    />
+
+                    {/* Aisle label */}
+                    <Text
+                      text={isHot ? "HOT AISLE" : "COLD AISLE"}
+                      x={w / 2}
+                      y={h / 2}
+                      offsetX={w / 4}
+                      offsetY={6}
+                      fontSize={Math.min(w / 10, h / 2, 16)}
+                      fill={isHot ? "#b71c1c" : "#0d47a1"}
+                      fontStyle="bold"
+                      align="center"
+                    />
+                  </Group>
                 );
               })}
 

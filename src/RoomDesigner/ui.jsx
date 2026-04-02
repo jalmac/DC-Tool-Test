@@ -255,6 +255,58 @@ export function ControlsPanel(props) {
         </div>
       )}
 
+      {/* Aisle Settings */}
+      {props.selectedAisle && (
+        <div style={{ marginBottom: 22 }}>
+          <h3 style={headingStyle}>
+            {props.aisleType === "hot" ? "Hot Aisle" : "Cold Aisle"}
+          </h3>
+
+          <label style={{ display: "block", marginBottom: 10 }}>
+            Width:
+            <input
+              type="number"
+              step={0.5}
+              min={1}
+              value={props.aisleWidth || ""}
+              onChange={(e) =>
+                props.updateAisleSize(
+                  props.selectedAisle,
+                  Number(e.target.value),
+                  props.aisleHeight
+                )
+              }
+              style={inputStyle}
+            />
+          </label>
+
+          <label style={{ display: "block", marginBottom: 10 }}>
+            Height:
+            <input
+              type="number"
+              step={0.1}
+              min={0.2}
+              value={props.aisleHeight || ""}
+              onChange={(e) =>
+                props.updateAisleSize(
+                  props.selectedAisle,
+                  props.aisleWidth,
+                  Number(e.target.value)
+                )
+              }
+              style={inputStyle}
+            />
+          </label>
+
+          <button
+            onClick={() => props.deleteAisle(props.selectedAisle)}
+            style={{ ...buttonStyle, background: "#b02020" }}
+          >
+            Delete Aisle
+          </button>
+        </div>
+      )}
+
       {/* Room Settings */}
       <div style={{ marginBottom: 22 }}>
         <h3 style={headingStyle}>Room Settings</h3>
