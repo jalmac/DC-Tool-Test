@@ -255,41 +255,25 @@ export function ControlsPanel(props) {
         </div>
       )}
 
-      {/* Aisle Appearance */}
-      <div style={{ marginBottom: 22 }}>
-        <h3 style={headingStyle}>Aisle Appearance</h3>
-
-        <label style={{ display: "block", marginBottom: 10 }}>
-          Design Style:
-          <select
-            value={props.aisleStyle || "current"}
-            onChange={(e) => props.setAisleStyle(e.target.value)}
-            style={{ ...inputStyle, width: "100%" }}
-          >
-            <option value="current">Current - Simple Solid</option>
-            <option value="gradient">Gradient - With Icons</option>
-            <option value="striped">Striped - Diagonal Pattern</option>
-          </select>
-        </label>
-
-        <div style={{
-          fontSize: 12,
-          color: "#666",
-          padding: "8px 10px",
-          background: "#f7fbff",
-          borderRadius: 6,
-          border: "1px solid #b7cbe0",
-        }}>
-          💡 Change the visual style of all hot/cold aisle markers
-        </div>
-      </div>
-
       {/* Aisle Settings */}
       {props.selectedAisle && (
         <div style={{ marginBottom: 22 }}>
           <h3 style={headingStyle}>
             {props.aisleType === "hot" ? "Hot Aisle" : "Cold Aisle"}
           </h3>
+
+          <label style={{ display: "block", marginBottom: 10 }}>
+            Design Style:
+            <select
+              value={props.aisleStyle || "current"}
+              onChange={(e) => props.setAisleStyle(e.target.value)}
+              style={{ ...inputStyle, width: "100%" }}
+            >
+              <option value="current">Current - Simple Solid</option>
+              <option value="gradient">Gradient - With Icons</option>
+              <option value="striped">Striped - Diagonal Pattern</option>
+            </select>
+          </label>
 
           <label style={{ display: "block", marginBottom: 10 }}>
             Width:

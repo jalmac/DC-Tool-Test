@@ -2141,9 +2141,6 @@ export default function RoomDesigner() {
                               newH / scaleToFit / scale
                             );
                           }}
-                          onDragEnd={(e) => {
-                            e.target.position({ x: w, y: h });
-                          }}
                         />
                         {/* Bottom-left resize handle */}
                         <Circle
@@ -2181,9 +2178,6 @@ export default function RoomDesigner() {
                               })
                             );
                           }}
-                          onDragEnd={(e) => {
-                            e.target.position({ x: 0, y: h });
-                          }}
                         />
                         {/* Top-right resize handle */}
                         <Circle
@@ -2220,9 +2214,6 @@ export default function RoomDesigner() {
                                 return a;
                               })
                             );
-                          }}
-                          onDragEnd={(e) => {
-                            e.target.position({ x: w, y: 0 });
                           }}
                         />
                         {/* Top-left resize handle */}
@@ -2263,9 +2254,6 @@ export default function RoomDesigner() {
                                 return a;
                               })
                             );
-                          }}
-                          onDragEnd={(e) => {
-                            e.target.position({ x: 0, y: 0 });
                           }}
                         />
                       </>
