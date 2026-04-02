@@ -2173,9 +2173,9 @@ export default function RoomDesigner() {
                                 a.id === aisle.id
                                   ? {
                                       ...a,
-                                      x: (sx - offsetX + deltaX) / scaleToFit / scale,
-                                      width: newW / scaleToFit / scale,
-                                      height: newH / scaleToFit / scale,
+                                      x: aisle.x + (deltaX / scaleToFit / scale),
+                                      width: newW / scaleToFit,
+                                      height: newH / scaleToFit,
                                     }
                                   : a
                               )
@@ -2208,9 +2208,9 @@ export default function RoomDesigner() {
                                 a.id === aisle.id
                                   ? {
                                       ...a,
-                                      y: (sy - offsetY + deltaY) / scaleToFit / scale,
-                                      width: newW / scaleToFit / scale,
-                                      height: newH / scaleToFit / scale,
+                                      y: aisle.y + (deltaY / scaleToFit / scale),
+                                      width: newW / scaleToFit,
+                                      height: newH / scaleToFit,
                                     }
                                   : a
                               )
@@ -2244,10 +2244,10 @@ export default function RoomDesigner() {
                                 a.id === aisle.id
                                   ? {
                                       ...a,
-                                      x: (sx - offsetX + deltaX) / scaleToFit / scale,
-                                      y: (sy - offsetY + deltaY) / scaleToFit / scale,
-                                      width: newW / scaleToFit / scale,
-                                      height: newH / scaleToFit / scale,
+                                      x: aisle.x + (deltaX / scaleToFit / scale),
+                                      y: aisle.y + (deltaY / scaleToFit / scale),
+                                      width: newW / scaleToFit,
+                                      height: newH / scaleToFit,
                                     }
                                   : a
                               )
