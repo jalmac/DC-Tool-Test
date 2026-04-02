@@ -2129,16 +2129,21 @@ export default function RoomDesigner() {
                           stroke="#000"
                           strokeWidth={2}
                           draggable
+                          dragBoundFunc={(pos) => {
+                            return {
+                              x: Math.max(50, pos.x),
+                              y: Math.max(20, pos.y),
+                            };
+                          }}
                           onDragEnd={(e) => {
-                            const newW = Math.max(50, e.target.x());
-                            const newH = Math.max(20, e.target.y());
+                            const node = e.target;
+                            const newW = node.x();
+                            const newH = node.y();
                             updateAisleSize(
                               aisle.id,
                               newW / scaleToFit,
                               newH / scaleToFit
                             );
-                            e.target.x(w);
-                            e.target.y(h);
                           }}
                         />
                         {/* Bottom-left resize handle */}
@@ -2150,10 +2155,17 @@ export default function RoomDesigner() {
                           stroke="#000"
                           strokeWidth={2}
                           draggable
+                          dragBoundFunc={(pos) => {
+                            return {
+                              x: Math.min(w - 50, pos.x),
+                              y: Math.max(20, pos.y),
+                            };
+                          }}
                           onDragEnd={(e) => {
-                            const deltaX = e.target.x();
-                            const newW = Math.max(50, w - deltaX);
-                            const newH = Math.max(20, e.target.y());
+                            const node = e.target;
+                            const deltaX = node.x();
+                            const newW = w - deltaX;
+                            const newH = node.y();
 
                             setAisles((prev) =>
                               prev.map((a) =>
@@ -2167,8 +2179,6 @@ export default function RoomDesigner() {
                                   : a
                               )
                             );
-                            e.target.x(0);
-                            e.target.y(h);
                           }}
                         />
                         {/* Top-right resize handle */}
@@ -2180,10 +2190,17 @@ export default function RoomDesigner() {
                           stroke="#000"
                           strokeWidth={2}
                           draggable
+                          dragBoundFunc={(pos) => {
+                            return {
+                              x: Math.max(50, pos.x),
+                              y: Math.min(h - 20, pos.y),
+                            };
+                          }}
                           onDragEnd={(e) => {
-                            const deltaY = e.target.y();
-                            const newW = Math.max(50, e.target.x());
-                            const newH = Math.max(20, h - deltaY);
+                            const node = e.target;
+                            const deltaY = node.y();
+                            const newW = node.x();
+                            const newH = h - deltaY;
 
                             setAisles((prev) =>
                               prev.map((a) =>
@@ -2197,8 +2214,6 @@ export default function RoomDesigner() {
                                   : a
                               )
                             );
-                            e.target.x(w);
-                            e.target.y(0);
                           }}
                         />
                         {/* Top-left resize handle */}
@@ -2210,11 +2225,18 @@ export default function RoomDesigner() {
                           stroke="#000"
                           strokeWidth={2}
                           draggable
+                          dragBoundFunc={(pos) => {
+                            return {
+                              x: Math.min(w - 50, pos.x),
+                              y: Math.min(h - 20, pos.y),
+                            };
+                          }}
                           onDragEnd={(e) => {
-                            const deltaX = e.target.x();
-                            const deltaY = e.target.y();
-                            const newW = Math.max(50, w - deltaX);
-                            const newH = Math.max(20, h - deltaY);
+                            const node = e.target;
+                            const deltaX = node.x();
+                            const deltaY = node.y();
+                            const newW = w - deltaX;
+                            const newH = h - deltaY;
 
                             setAisles((prev) =>
                               prev.map((a) =>
@@ -2229,8 +2251,6 @@ export default function RoomDesigner() {
                                   : a
                               )
                             );
-                            e.target.x(0);
-                            e.target.y(0);
                           }}
                         />
                       </>
