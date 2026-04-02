@@ -46,6 +46,40 @@ function clampRoom(v) {
   return v;
 }
 
+// Aisle color scheme configurations
+const AISLE_COLOR_SCHEMES = {
+  current: {
+    name: "Current (Red/Blue)",
+    hot: { fill: "#ffcdd2", border: "#d32f2f", text: "#b71c1c" },
+    cold: { fill: "#bbdefb", border: "#1976d2", text: "#0d47a1" },
+  },
+  highContrast: {
+    name: "High Contrast (Orange/Cyan)",
+    hot: { fill: "#FFE0B2", border: "#FF6F00", text: "#E65100" },
+    cold: { fill: "#E0F7FA", border: "#00ACC1", text: "#006064" },
+  },
+  trafficLight: {
+    name: "Traffic Light (Red/Green)",
+    hot: { fill: "#FFCDD2", border: "#D32F2F", text: "#B71C1C" },
+    cold: { fill: "#C8E6C9", border: "#388E3C", text: "#1B5E20" },
+  },
+  industrial: {
+    name: "Industrial (Yellow/Gray)",
+    hot: { fill: "#FFF9C4", border: "#F57F17", text: "#F57F17" },
+    cold: { fill: "#F5F5F5", border: "#424242", text: "#212121" },
+  },
+  neon: {
+    name: "Neon Tech (Magenta/Cyan)",
+    hot: { fill: "#FCE4EC", border: "#C2185B", text: "#880E4F" },
+    cold: { fill: "#E1F5FE", border: "#0288D1", text: "#01579B" },
+  },
+  earthy: {
+    name: "Earthy (Terracotta/Mint)",
+    hot: { fill: "#FFCCBC", border: "#D84315", text: "#BF360C" },
+    cold: { fill: "#E8F5E9", border: "#66BB6A", text: "#2E7D32" },
+  },
+};
+
 export default function RoomDesigner() {
   const stageRef = useRef(null);
   const canvasContainerRef = useRef(null);
@@ -125,6 +159,7 @@ export default function RoomDesigner() {
 
   const [aisles, setAisles] = useState([]);
   const [selectedAisle, setSelectedAisle] = useState(null);
+  const [aisleColorScheme, setAisleColorScheme] = useState("current");
 
   const [measurements, setMeasurements] = useState([]);
   const [measurementMode, setMeasurementMode] = useState(false);
@@ -1290,6 +1325,8 @@ export default function RoomDesigner() {
           aisleHeight={aisles.find((a) => a.id === selectedAisle)?.height / scale || null}
           updateAisleSize={updateAisleSize}
           deleteAisle={deleteAisle}
+          aisleColorScheme={aisleColorScheme}
+          setAisleColorScheme={setAisleColorScheme}
           measurementMode={measurementMode}
           toggleMeasurementMode={toggleMeasurementMode}
           measurementsCount={measurements.length}
@@ -2009,6 +2046,10 @@ export default function RoomDesigner() {
                 const text = isHot ? "HOT AISLE" : "COLD AISLE";
                 const fontSize = Math.min(w / 10, h / 2, 16);
 
+                // Get colors from selected scheme
+                const scheme = AISLE_COLOR_SCHEMES[aisleColorScheme];
+                const colors = isHot ? scheme.hot : scheme.cold;
+
                 return (
                   <Group
                     key={aisle.id}
@@ -2030,8 +2071,8 @@ export default function RoomDesigner() {
                     <Rect
                       width={w}
                       height={h}
-                      fill={isHot ? "#ffcdd2" : "#bbdefb"}
-                      stroke={isSelected ? "#000" : (isHot ? "#d32f2f" : "#1976d2")}
+                      fill={colors.fill}
+                      stroke={isSelected ? "#000" : colors.border}
                       strokeWidth={isSelected ? 3 : 2}
                       opacity={0.6}
                       cornerRadius={4}
@@ -2043,7 +2084,7 @@ export default function RoomDesigner() {
                       width={w}
                       height={h}
                       fontSize={fontSize}
-                      fill={isHot ? "#b71c1c" : "#0d47a1"}
+                      fill={colors.text}
                       fontStyle="bold"
                       align="center"
                       verticalAlign="middle"

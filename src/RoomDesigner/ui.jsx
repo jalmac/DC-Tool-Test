@@ -3,6 +3,37 @@
 
 import React from "react";
 
+// Helper function to get aisle preview colors
+function getAislePreviewColor(scheme, type) {
+  const schemes = {
+    current: {
+      hot: "#ffcdd2",
+      cold: "#bbdefb",
+    },
+    highContrast: {
+      hot: "#FFE0B2",
+      cold: "#E0F7FA",
+    },
+    trafficLight: {
+      hot: "#FFCDD2",
+      cold: "#C8E6C9",
+    },
+    industrial: {
+      hot: "#FFF9C4",
+      cold: "#F5F5F5",
+    },
+    neon: {
+      hot: "#FCE4EC",
+      cold: "#E1F5FE",
+    },
+    earthy: {
+      hot: "#FFCCBC",
+      cold: "#E8F5E9",
+    },
+  };
+  return schemes[scheme]?.[type] || schemes.current[type];
+}
+
 export function ControlsPanel(props) {
   const inputStyle = {
     width: 80,
@@ -306,6 +337,53 @@ export function ControlsPanel(props) {
           </button>
         </div>
       )}
+
+      {/* Aisle Appearance */}
+      <div style={{ marginBottom: 22 }}>
+        <h3 style={headingStyle}>Aisle Appearance</h3>
+
+        <label style={{ display: "block", marginBottom: 10 }}>
+          Color Scheme:
+          <select
+            value={props.aisleColorScheme || "current"}
+            onChange={(e) => props.setAisleColorScheme(e.target.value)}
+            style={{ ...inputStyle, width: "100%" }}
+          >
+            <option value="current">Current (Red/Blue)</option>
+            <option value="highContrast">High Contrast (Orange/Cyan)</option>
+            <option value="trafficLight">Traffic Light (Red/Green)</option>
+            <option value="industrial">Industrial (Yellow/Gray)</option>
+            <option value="neon">Neon Tech (Magenta/Cyan)</option>
+            <option value="earthy">Earthy (Terracotta/Mint)</option>
+          </select>
+        </label>
+
+        {/* Color preview swatches */}
+        <div style={{ display: "flex", gap: 8, marginTop: 10 }}>
+          <div style={{ flex: 1 }}>
+            <div style={{ fontSize: 11, color: "#666", marginBottom: 4, textAlign: "center" }}>Hot</div>
+            <div
+              style={{
+                height: 40,
+                borderRadius: 6,
+                border: "2px solid #ccc",
+                background: getAislePreviewColor(props.aisleColorScheme, "hot"),
+              }}
+            />
+          </div>
+          <div style={{ flex: 1 }}>
+            <div style={{ fontSize: 11, color: "#666", marginBottom: 4, textAlign: "center" }}>Cold</div>
+            <div
+              style={{
+                height: 40,
+                borderRadius: 6,
+                border: "2px solid #ccc",
+                background: getAislePreviewColor(props.aisleColorScheme, "cold"),
+              }}
+            />
+          </div>
+        </div>
+      </div>
 
       {/* Room Settings */}
       <div style={{ marginBottom: 22 }}>
