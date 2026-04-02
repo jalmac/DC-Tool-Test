@@ -125,6 +125,7 @@ export default function RoomDesigner() {
 
   const [aisles, setAisles] = useState([]);
   const [selectedAisle, setSelectedAisle] = useState(null);
+  const [aisleStyle, setAisleStyle] = useState("current"); // current, gradient, striped
 
   const [measurements, setMeasurements] = useState([]);
   const [measurementMode, setMeasurementMode] = useState(false);
@@ -1290,6 +1291,8 @@ export default function RoomDesigner() {
           aisleHeight={aisles.find((a) => a.id === selectedAisle)?.height / scale || null}
           updateAisleSize={updateAisleSize}
           deleteAisle={deleteAisle}
+          aisleStyle={aisleStyle}
+          setAisleStyle={setAisleStyle}
           measurementMode={measurementMode}
           toggleMeasurementMode={toggleMeasurementMode}
           measurementsCount={measurements.length}
@@ -2009,6 +2012,32 @@ export default function RoomDesigner() {
                 const text = isHot ? "HOT AISLE" : "COLD AISLE";
                 const fontSize = Math.min(w / 10, h / 2, 16);
 
+                // Style-specific properties
+                const getAisleStyle = () => {
+                  if (aisleStyle === "gradient") {
+                    return {
+                      fill: null,
+                      fillLinearGradientStartPoint: { x: 0, y: 0 },
+                      fillLinearGradientEndPoint: { x: w, y: h },
+                      fillLinearGradientColorStops: isHot
+                        ? [0, '#ffcdd2', 1, '#ef9a9a']
+                        : [0, '#bbdefb', 1, '#90caf9'],
+                    };
+                  } else if (aisleStyle === "striped") {
+                    // For striped, we'll use the base fill and add stripes as overlay
+                    return {
+                      fill: isHot ? "#ffcdd2" : "#bbdefb",
+                    };
+                  } else {
+                    // Current style
+                    return {
+                      fill: isHot ? "#ffcdd2" : "#bbdefb",
+                    };
+                  }
+                };
+
+                const styleProps = getAisleStyle();
+
                 return (
                   <Group
                     key={aisle.id}
@@ -2030,24 +2059,53 @@ export default function RoomDesigner() {
                     <Rect
                       width={w}
                       height={h}
-                      fill={isHot ? "#ffcdd2" : "#bbdefb"}
+                      {...styleProps}
                       stroke={isSelected ? "#000" : (isHot ? "#d32f2f" : "#1976d2")}
                       strokeWidth={isSelected ? 3 : 2}
                       opacity={0.6}
                       cornerRadius={4}
                     />
 
-                    {/* Aisle label - properly centered */}
-                    <Text
-                      text={text}
-                      width={w}
-                      height={h}
-                      fontSize={fontSize}
-                      fill={isHot ? "#b71c1c" : "#0d47a1"}
-                      fontStyle="bold"
-                      align="center"
-                      verticalAlign="middle"
-                    />
+                    {/* Striped pattern overlay (only for striped style) */}
+                    {aisleStyle === "striped" && (
+                      <>
+                        {Array.from({ length: Math.ceil(w / 20) }).map((_, i) => (
+                          <Line
+                            key={`stripe-${i}`}
+                            points={[
+                              i * 20, 0,
+                              i * 20 + h, h
+                            ]}
+                            stroke={isHot ? "#ffebee" : "#e3f2fd"}
+                            strokeWidth={10}
+                            opacity={0.6}
+                          />
+                        ))}
+                      </>
+                    )}
+
+                    {/* Aisle label with icon (gradient style gets icons) */}
+                    <Group>
+                      {aisleStyle === "gradient" && (
+                        <Text
+                          text={isHot ? "🔥" : "❄️"}
+                          x={w / 2 - fontSize * 2}
+                          y={h / 2 - fontSize / 2}
+                          fontSize={fontSize}
+                        />
+                      )}
+                      <Text
+                        text={text}
+                        x={aisleStyle === "gradient" ? fontSize : 0}
+                        width={aisleStyle === "gradient" ? w - fontSize : w}
+                        height={h}
+                        fontSize={fontSize}
+                        fill={isHot ? "#b71c1c" : "#0d47a1"}
+                        fontStyle="bold"
+                        align="center"
+                        verticalAlign="middle"
+                      />
+                    </Group>
 
                     {/* Resize handles - only show when selected */}
                     {isSelected && !exporting && (
