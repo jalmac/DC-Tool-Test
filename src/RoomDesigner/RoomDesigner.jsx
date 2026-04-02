@@ -2138,8 +2138,8 @@ export default function RoomDesigner() {
                               newH / scaleToFit / scale
                             );
                           }}
-                          onDragEnd={() => {
-                            // Prevent handle from snapping back
+                          onDragEnd={(e) => {
+                            e.target.position({ x: w, y: h });
                           }}
                         />
                         {/* Bottom-left resize handle */}
@@ -2165,20 +2165,21 @@ export default function RoomDesigner() {
                             const physicalDeltaX = deltaX / scaleToFit / scale;
 
                             setAisles((prev) =>
-                              prev.map((a) =>
-                                a.id === aisle.id
-                                  ? {
-                                      ...a,
-                                      x: aisle.x + physicalDeltaX,
-                                      width: newWPx / scaleToFit,
-                                      height: newHPx / scaleToFit,
-                                    }
-                                  : a
-                              )
+                              prev.map((a) => {
+                                if (a.id === aisle.id) {
+                                  return {
+                                    ...a,
+                                    x: a.x + physicalDeltaX,
+                                    width: newWPx / scaleToFit,
+                                    height: newHPx / scaleToFit,
+                                  };
+                                }
+                                return a;
+                              })
                             );
                           }}
-                          onDragEnd={() => {
-                            // Prevent handle from snapping back
+                          onDragEnd={(e) => {
+                            e.target.position({ x: 0, y: h });
                           }}
                         />
                         {/* Top-right resize handle */}
@@ -2204,20 +2205,21 @@ export default function RoomDesigner() {
                             const physicalDeltaY = deltaY / scaleToFit / scale;
 
                             setAisles((prev) =>
-                              prev.map((a) =>
-                                a.id === aisle.id
-                                  ? {
-                                      ...a,
-                                      y: aisle.y + physicalDeltaY,
-                                      width: newWPx / scaleToFit,
-                                      height: newHPx / scaleToFit,
-                                    }
-                                  : a
-                              )
+                              prev.map((a) => {
+                                if (a.id === aisle.id) {
+                                  return {
+                                    ...a,
+                                    y: a.y + physicalDeltaY,
+                                    width: newWPx / scaleToFit,
+                                    height: newHPx / scaleToFit,
+                                  };
+                                }
+                                return a;
+                              })
                             );
                           }}
-                          onDragEnd={() => {
-                            // Prevent handle from snapping back
+                          onDragEnd={(e) => {
+                            e.target.position({ x: w, y: 0 });
                           }}
                         />
                         {/* Top-left resize handle */}
@@ -2245,21 +2247,22 @@ export default function RoomDesigner() {
                             const physicalDeltaY = deltaY / scaleToFit / scale;
 
                             setAisles((prev) =>
-                              prev.map((a) =>
-                                a.id === aisle.id
-                                  ? {
-                                      ...a,
-                                      x: aisle.x + physicalDeltaX,
-                                      y: aisle.y + physicalDeltaY,
-                                      width: newWPx / scaleToFit,
-                                      height: newHPx / scaleToFit,
-                                    }
-                                  : a
-                              )
+                              prev.map((a) => {
+                                if (a.id === aisle.id) {
+                                  return {
+                                    ...a,
+                                    x: a.x + physicalDeltaX,
+                                    y: a.y + physicalDeltaY,
+                                    width: newWPx / scaleToFit,
+                                    height: newHPx / scaleToFit,
+                                  };
+                                }
+                                return a;
+                              })
                             );
                           }}
-                          onDragEnd={() => {
-                            // Prevent handle from snapping back
+                          onDragEnd={(e) => {
+                            e.target.position({ x: 0, y: 0 });
                           }}
                         />
                       </>
