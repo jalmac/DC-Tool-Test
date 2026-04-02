@@ -2085,19 +2085,29 @@ export default function RoomDesigner() {
                     )}
 
                     {/* Aisle label with icon (gradient style gets icons) */}
-                    <Group>
-                      {aisleStyle === "gradient" && (
+                    {aisleStyle === "gradient" ? (
+                      <Group>
                         <Text
-                          text={isHot ? "🔥" : "❄️"}
-                          x={w / 2 - fontSize * 2}
+                          text={isHot ? "🔥 " : "❄️ "}
+                          x={w / 2 - (text.length * fontSize * 0.35)}
                           y={h / 2 - fontSize / 2}
                           fontSize={fontSize}
+                          fill={isHot ? "#b71c1c" : "#0d47a1"}
+                          fontStyle="bold"
                         />
-                      )}
+                        <Text
+                          text={text}
+                          x={w / 2 - (text.length * fontSize * 0.25)}
+                          y={h / 2 - fontSize / 2}
+                          fontSize={fontSize}
+                          fill={isHot ? "#b71c1c" : "#0d47a1"}
+                          fontStyle="bold"
+                        />
+                      </Group>
+                    ) : (
                       <Text
                         text={text}
-                        x={aisleStyle === "gradient" ? fontSize : 0}
-                        width={aisleStyle === "gradient" ? w - fontSize : w}
+                        width={w}
                         height={h}
                         fontSize={fontSize}
                         fill={isHot ? "#b71c1c" : "#0d47a1"}
@@ -2105,7 +2115,7 @@ export default function RoomDesigner() {
                         align="center"
                         verticalAlign="middle"
                       />
-                    </Group>
+                    )}
 
                     {/* Resize handles - only show when selected */}
                     {isSelected && !exporting && (
@@ -2119,7 +2129,7 @@ export default function RoomDesigner() {
                           stroke="#000"
                           strokeWidth={2}
                           draggable
-                          onDragMove={(e) => {
+                          onDragEnd={(e) => {
                             const newW = Math.max(50, e.target.x());
                             const newH = Math.max(20, e.target.y());
                             updateAisleSize(
@@ -2127,8 +2137,6 @@ export default function RoomDesigner() {
                               newW / scaleToFit,
                               newH / scaleToFit
                             );
-                          }}
-                          onDragEnd={(e) => {
                             e.target.x(w);
                             e.target.y(h);
                           }}
@@ -2142,7 +2150,7 @@ export default function RoomDesigner() {
                           stroke="#000"
                           strokeWidth={2}
                           draggable
-                          onDragMove={(e) => {
+                          onDragEnd={(e) => {
                             const deltaX = e.target.x();
                             const newW = Math.max(50, w - deltaX);
                             const newH = Math.max(20, e.target.y());
@@ -2159,8 +2167,6 @@ export default function RoomDesigner() {
                                   : a
                               )
                             );
-                          }}
-                          onDragEnd={(e) => {
                             e.target.x(0);
                             e.target.y(h);
                           }}
@@ -2174,7 +2180,7 @@ export default function RoomDesigner() {
                           stroke="#000"
                           strokeWidth={2}
                           draggable
-                          onDragMove={(e) => {
+                          onDragEnd={(e) => {
                             const deltaY = e.target.y();
                             const newW = Math.max(50, e.target.x());
                             const newH = Math.max(20, h - deltaY);
@@ -2191,8 +2197,6 @@ export default function RoomDesigner() {
                                   : a
                               )
                             );
-                          }}
-                          onDragEnd={(e) => {
                             e.target.x(w);
                             e.target.y(0);
                           }}
@@ -2206,7 +2210,7 @@ export default function RoomDesigner() {
                           stroke="#000"
                           strokeWidth={2}
                           draggable
-                          onDragMove={(e) => {
+                          onDragEnd={(e) => {
                             const deltaX = e.target.x();
                             const deltaY = e.target.y();
                             const newW = Math.max(50, w - deltaX);
@@ -2225,8 +2229,6 @@ export default function RoomDesigner() {
                                   : a
                               )
                             );
-                          }}
-                          onDragEnd={(e) => {
                             e.target.x(0);
                             e.target.y(0);
                           }}
