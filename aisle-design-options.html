@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hot/Cold Aisle Design Options</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+      background: #f5f7fa;
+      padding: 40px 20px;
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    h1 {
+      text-align: center;
+      color: #1a1a1a;
+      margin-bottom: 10px;
+      font-size: 32px;
+    }
+
+    .subtitle {
+      text-align: center;
+      color: #666;
+      margin-bottom: 40px;
+      font-size: 16px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+      gap: 30px;
+      margin-bottom: 40px;
+    }
+
+    .card {
+      background: white;
+      border-radius: 12px;
+      padding: 24px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+    }
+
+    .card.current {
+      border: 3px solid #FF9800;
+      position: relative;
+    }
+
+    .badge {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      background: #FF9800;
+      color: white;
+      padding: 4px 12px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .card-title {
+      font-size: 20px;
+      font-weight: 600;
+      color: #1a1a1a;
+      margin-bottom: 8px;
+    }
+
+    .card-desc {
+      font-size: 14px;
+      color: #666;
+      margin-bottom: 20px;
+      line-height: 1.5;
+    }
+
+    .preview {
+      background: #e3f2fd;
+      border-radius: 8px;
+      padding: 30px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      align-items: center;
+      min-height: 220px;
+      justify-content: center;
+    }
+
+    .aisle {
+      width: 280px;
+      height: 60px;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      font-size: 14px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Current Design - Simple solid */
+    .current-hot {
+      background: #ffcdd2;
+      border: 2px solid #d32f2f;
+      color: #b71c1c;
+    }
+
+    .current-cold {
+      background: #bbdefb;
+      border: 2px solid #1976d2;
+      color: #0d47a1;
+    }
+
+    /* Option 1 - Gradient with Icons */
+    .gradient-hot {
+      background: linear-gradient(135deg, #ffcdd2 0%, #ef9a9a 100%);
+      border: 2px solid #d32f2f;
+      color: #b71c1c;
+    }
+
+    .gradient-cold {
+      background: linear-gradient(135deg, #bbdefb 0%, #90caf9 100%);
+      border: 2px solid #1976d2;
+      color: #0d47a1;
+    }
+
+    /* Option 2 - Striped Pattern */
+    .striped-hot {
+      background: repeating-linear-gradient(
+        45deg,
+        #ffcdd2,
+        #ffcdd2 10px,
+        #ffebee 10px,
+        #ffebee 20px
+      );
+      border: 2px solid #d32f2f;
+      color: #b71c1c;
+    }
+
+    .striped-cold {
+      background: repeating-linear-gradient(
+        45deg,
+        #bbdefb,
+        #bbdefb 10px,
+        #e3f2fd 10px,
+        #e3f2fd 20px
+      );
+      border: 2px solid #1976d2;
+      color: #0d47a1;
+    }
+
+    /* Option 3 - Dashed Border with Arrows */
+    .dashed-hot {
+      background: #ffebee;
+      border: 3px dashed #d32f2f;
+      color: #b71c1c;
+    }
+
+    .dashed-cold {
+      background: #e3f2fd;
+      border: 3px dashed #1976d2;
+      color: #0d47a1;
+    }
+
+    /* Option 4 - Glow Effect */
+    .glow-hot {
+      background: #ffcdd2;
+      border: 2px solid #d32f2f;
+      color: #b71c1c;
+      box-shadow: 0 0 20px rgba(211, 47, 47, 0.4), inset 0 0 20px rgba(211, 47, 47, 0.1);
+    }
+
+    .glow-cold {
+      background: #bbdefb;
+      border: 2px solid #1976d2;
+      color: #0d47a1;
+      box-shadow: 0 0 20px rgba(25, 118, 210, 0.4), inset 0 0 20px rgba(25, 118, 210, 0.1);
+    }
+
+    /* Option 5 - Double Border */
+    .double-hot {
+      background: #ffebee;
+      border: 3px double #d32f2f;
+      color: #b71c1c;
+    }
+
+    .double-cold {
+      background: #e3f2fd;
+      border: 3px double #1976d2;
+      color: #0d47a1;
+    }
+
+    /* Option 6 - Outlined with Shadow */
+    .outlined-hot {
+      background: white;
+      border: 3px solid #d32f2f;
+      color: #d32f2f;
+      box-shadow: 0 4px 8px rgba(211, 47, 47, 0.2);
+    }
+
+    .outlined-cold {
+      background: white;
+      border: 3px solid #1976d2;
+      color: #1976d2;
+      box-shadow: 0 4px 8px rgba(25, 118, 210, 0.2);
+    }
+
+    /* Option 7 - Dotted Pattern Background */
+    .dotted-hot {
+      background-color: #ffcdd2;
+      background-image: radial-gradient(#d32f2f 1px, transparent 1px);
+      background-size: 8px 8px;
+      border: 2px solid #d32f2f;
+      color: #b71c1c;
+    }
+
+    .dotted-cold {
+      background-color: #bbdefb;
+      background-image: radial-gradient(#1976d2 1px, transparent 1px);
+      background-size: 8px 8px;
+      border: 2px solid #1976d2;
+      color: #0d47a1;
+    }
+
+    /* Option 8 - Bold with Thick Border */
+    .bold-hot {
+      background: #ffebee;
+      border: 5px solid #d32f2f;
+      color: #b71c1c;
+      font-size: 16px;
+    }
+
+    .bold-cold {
+      background: #e3f2fd;
+      border: 5px solid #1976d2;
+      color: #0d47a1;
+      font-size: 16px;
+    }
+
+    /* Option 9 - Neon/Bright */
+    .neon-hot {
+      background: #ff5252;
+      border: 2px solid #c62828;
+      color: white;
+      text-shadow: 0 0 10px rgba(0,0,0,0.3);
+    }
+
+    .neon-cold {
+      background: #448aff;
+      border: 2px solid #1565c0;
+      color: white;
+      text-shadow: 0 0 10px rgba(0,0,0,0.3);
+    }
+
+    /* Option 10 - Minimal Flat */
+    .flat-hot {
+      background: #ffebee;
+      border: none;
+      border-left: 6px solid #d32f2f;
+      color: #b71c1c;
+    }
+
+    .flat-cold {
+      background: #e3f2fd;
+      border: none;
+      border-left: 6px solid #1976d2;
+      color: #0d47a1;
+    }
+
+    /* Icons */
+    .icon {
+      margin-right: 8px;
+      font-size: 18px;
+    }
+
+    .arrows {
+      position: absolute;
+      top: 50%;
+      right: 20px;
+      transform: translateY(-50%);
+      font-size: 20px;
+      opacity: 0.5;
+    }
+
+    .label-container {
+      display: flex;
+      align-items: center;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🔥❄️ Hot/Cold Aisle Design Options</h1>
+    <p class="subtitle">Click on any design card to see it in detail • Red = Hot Aisle • Blue = Cold Aisle</p>
+
+    <div class="grid">
+      <!-- Current Design -->
+      <div class="card current">
+        <span class="badge">⭐ Current</span>
+        <h2 class="card-title">Current Design</h2>
+        <p class="card-desc">Simple solid fill with border - clean and straightforward</p>
+        <div class="preview">
+          <div class="aisle current-hot">HOT AISLE</div>
+          <div class="aisle current-cold">COLD AISLE</div>
+        </div>
+      </div>
+
+      <!-- Option 1: Gradient -->
+      <div class="card">
+        <h2 class="card-title">Option 1: Gradient</h2>
+        <p class="card-desc">Subtle gradient effect adds depth and visual interest</p>
+        <div class="preview">
+          <div class="aisle gradient-hot">
+            <span class="icon">🔥</span> HOT AISLE
+          </div>
+          <div class="aisle gradient-cold">
+            <span class="icon">❄️</span> COLD AISLE
+          </div>
+        </div>
+      </div>
+
+      <!-- Option 2: Striped -->
+      <div class="card">
+        <h2 class="card-title">Option 2: Striped Pattern</h2>
+        <p class="card-desc">Diagonal stripes for high visibility - industrial look</p>
+        <div class="preview">
+          <div class="aisle striped-hot">HOT AISLE</div>
+          <div class="aisle striped-cold">COLD AISLE</div>
+        </div>
+      </div>
+
+      <!-- Option 3: Dashed Border -->
+      <div class="card">
+        <h2 class="card-title">Option 3: Dashed Border</h2>
+        <p class="card-desc">Dashed outline with arrows - shows airflow direction</p>
+        <div class="preview">
+          <div class="aisle dashed-hot">
+            <span class="label-container">
+              HOT AISLE
+              <span class="arrows">→→→</span>
+            </span>
+          </div>
+          <div class="aisle dashed-cold">
+            <span class="label-container">
+              COLD AISLE
+              <span class="arrows">←←←</span>
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Option 4: Glow Effect -->
+      <div class="card">
+        <h2 class="card-title">Option 4: Glow Effect</h2>
+        <p class="card-desc">Soft glow/shadow for modern, futuristic appearance</p>
+        <div class="preview">
+          <div class="aisle glow-hot">HOT AISLE</div>
+          <div class="aisle glow-cold">COLD AISLE</div>
+        </div>
+      </div>
+
+      <!-- Option 5: Double Border -->
+      <div class="card">
+        <h2 class="card-title">Option 5: Double Border</h2>
+        <p class="card-desc">Classic double-line border - professional and clear</p>
+        <div class="preview">
+          <div class="aisle double-hot">HOT AISLE</div>
+          <div class="aisle double-cold">COLD AISLE</div>
+        </div>
+      </div>
+
+      <!-- Option 6: Outlined -->
+      <div class="card">
+        <h2 class="card-title">Option 6: Outlined</h2>
+        <p class="card-desc">White background with colored border - minimalist and crisp</p>
+        <div class="preview">
+          <div class="aisle outlined-hot">HOT AISLE</div>
+          <div class="aisle outlined-cold">COLD AISLE</div>
+        </div>
+      </div>
+
+      <!-- Option 7: Dotted Pattern -->
+      <div class="card">
+        <h2 class="card-title">Option 7: Dotted Pattern</h2>
+        <p class="card-desc">Subtle dot pattern background - unique texture</p>
+        <div class="preview">
+          <div class="aisle dotted-hot">HOT AISLE</div>
+          <div class="aisle dotted-cold">COLD AISLE</div>
+        </div>
+      </div>
+
+      <!-- Option 8: Bold -->
+      <div class="card">
+        <h2 class="card-title">Option 8: Bold & Thick</h2>
+        <p class="card-desc">Extra thick border for maximum visibility and emphasis</p>
+        <div class="preview">
+          <div class="aisle bold-hot">HOT AISLE</div>
+          <div class="aisle bold-cold">COLD AISLE</div>
+        </div>
+      </div>
+
+      <!-- Option 9: Neon -->
+      <div class="card">
+        <h2 class="card-title">Option 9: Neon/Vibrant</h2>
+        <p class="card-desc">Bright, saturated colors - high contrast and modern</p>
+        <div class="preview">
+          <div class="aisle neon-hot">HOT AISLE</div>
+          <div class="aisle neon-cold">COLD AISLE</div>
+        </div>
+      </div>
+
+      <!-- Option 10: Flat Minimal -->
+      <div class="card">
+        <h2 class="card-title">Option 10: Flat Minimal</h2>
+        <p class="card-desc">Accent stripe on left - ultra-clean and contemporary</p>
+        <div class="preview">
+          <div class="aisle flat-hot">HOT AISLE</div>
+          <div class="aisle flat-cold">COLD AISLE</div>
+        </div>
+      </div>
+    </div>
+
+    <div style="text-align: center; color: #666; padding: 20px;">
+      <p>💡 <strong>Tip:</strong> These designs maintain the red/blue color scheme while offering different visual styles</p>
+      <p style="margin-top: 8px; font-size: 14px;">All options provide good contrast against the blue room background</p>
+    </div>
+  </div>
+</body>
+</html>
