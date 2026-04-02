@@ -2006,6 +2006,8 @@ export default function RoomDesigner() {
                 const h = aisle.height * scaleToFit;
                 const isSelected = selectedAisle === aisle.id;
                 const isHot = aisle.type === "hot";
+                const text = isHot ? "HOT AISLE" : "COLD AISLE";
+                const fontSize = Math.min(w / 10, h / 2, 16);
 
                 return (
                   <Group
@@ -2035,18 +2037,144 @@ export default function RoomDesigner() {
                       cornerRadius={4}
                     />
 
-                    {/* Aisle label */}
+                    {/* Aisle label - properly centered */}
                     <Text
-                      text={isHot ? "HOT AISLE" : "COLD AISLE"}
-                      x={w / 2}
-                      y={h / 2}
-                      offsetX={w / 4}
-                      offsetY={6}
-                      fontSize={Math.min(w / 10, h / 2, 16)}
+                      text={text}
+                      width={w}
+                      height={h}
+                      fontSize={fontSize}
                       fill={isHot ? "#b71c1c" : "#0d47a1"}
                       fontStyle="bold"
                       align="center"
+                      verticalAlign="middle"
                     />
+
+                    {/* Resize handles - only show when selected */}
+                    {isSelected && !exporting && (
+                      <>
+                        {/* Bottom-right resize handle */}
+                        <Circle
+                          x={w}
+                          y={h}
+                          radius={6}
+                          fill="#fff"
+                          stroke="#000"
+                          strokeWidth={2}
+                          draggable
+                          onDragMove={(e) => {
+                            const newW = Math.max(50, e.target.x());
+                            const newH = Math.max(20, e.target.y());
+                            updateAisleSize(
+                              aisle.id,
+                              newW / scaleToFit,
+                              newH / scaleToFit
+                            );
+                          }}
+                          onDragEnd={(e) => {
+                            e.target.x(w);
+                            e.target.y(h);
+                          }}
+                        />
+                        {/* Bottom-left resize handle */}
+                        <Circle
+                          x={0}
+                          y={h}
+                          radius={6}
+                          fill="#fff"
+                          stroke="#000"
+                          strokeWidth={2}
+                          draggable
+                          onDragMove={(e) => {
+                            const deltaX = e.target.x();
+                            const newW = Math.max(50, w - deltaX);
+                            const newH = Math.max(20, e.target.y());
+
+                            setAisles((prev) =>
+                              prev.map((a) =>
+                                a.id === aisle.id
+                                  ? {
+                                      ...a,
+                                      x: (sx - offsetX + deltaX) / scaleToFit,
+                                      width: newW / scaleToFit,
+                                      height: newH / scaleToFit,
+                                    }
+                                  : a
+                              )
+                            );
+                          }}
+                          onDragEnd={(e) => {
+                            e.target.x(0);
+                            e.target.y(h);
+                          }}
+                        />
+                        {/* Top-right resize handle */}
+                        <Circle
+                          x={w}
+                          y={0}
+                          radius={6}
+                          fill="#fff"
+                          stroke="#000"
+                          strokeWidth={2}
+                          draggable
+                          onDragMove={(e) => {
+                            const deltaY = e.target.y();
+                            const newW = Math.max(50, e.target.x());
+                            const newH = Math.max(20, h - deltaY);
+
+                            setAisles((prev) =>
+                              prev.map((a) =>
+                                a.id === aisle.id
+                                  ? {
+                                      ...a,
+                                      y: (sy - offsetY + deltaY) / scaleToFit,
+                                      width: newW / scaleToFit,
+                                      height: newH / scaleToFit,
+                                    }
+                                  : a
+                              )
+                            );
+                          }}
+                          onDragEnd={(e) => {
+                            e.target.x(w);
+                            e.target.y(0);
+                          }}
+                        />
+                        {/* Top-left resize handle */}
+                        <Circle
+                          x={0}
+                          y={0}
+                          radius={6}
+                          fill="#fff"
+                          stroke="#000"
+                          strokeWidth={2}
+                          draggable
+                          onDragMove={(e) => {
+                            const deltaX = e.target.x();
+                            const deltaY = e.target.y();
+                            const newW = Math.max(50, w - deltaX);
+                            const newH = Math.max(20, h - deltaY);
+
+                            setAisles((prev) =>
+                              prev.map((a) =>
+                                a.id === aisle.id
+                                  ? {
+                                      ...a,
+                                      x: (sx - offsetX + deltaX) / scaleToFit,
+                                      y: (sy - offsetY + deltaY) / scaleToFit,
+                                      width: newW / scaleToFit,
+                                      height: newH / scaleToFit,
+                                    }
+                                  : a
+                              )
+                            );
+                          }}
+                          onDragEnd={(e) => {
+                            e.target.x(0);
+                            e.target.y(0);
+                          }}
+                        />
+                      </>
+                    )}
                   </Group>
                 );
               })}
