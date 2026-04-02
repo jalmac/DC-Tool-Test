@@ -2139,10 +2139,11 @@ export default function RoomDesigner() {
                             const node = e.target;
                             const newW = node.x();
                             const newH = node.y();
+                            // Convert from screen pixels to physical units
                             updateAisleSize(
                               aisle.id,
-                              newW / scaleToFit,
-                              newH / scaleToFit
+                              newW / scaleToFit / scale,
+                              newH / scaleToFit / scale
                             );
                           }}
                         />
@@ -2172,9 +2173,9 @@ export default function RoomDesigner() {
                                 a.id === aisle.id
                                   ? {
                                       ...a,
-                                      x: (sx - offsetX + deltaX) / scaleToFit,
-                                      width: newW / scaleToFit,
-                                      height: newH / scaleToFit,
+                                      x: (sx - offsetX + deltaX) / scaleToFit / scale,
+                                      width: newW / scaleToFit / scale,
+                                      height: newH / scaleToFit / scale,
                                     }
                                   : a
                               )
@@ -2207,9 +2208,9 @@ export default function RoomDesigner() {
                                 a.id === aisle.id
                                   ? {
                                       ...a,
-                                      y: (sy - offsetY + deltaY) / scaleToFit,
-                                      width: newW / scaleToFit,
-                                      height: newH / scaleToFit,
+                                      y: (sy - offsetY + deltaY) / scaleToFit / scale,
+                                      width: newW / scaleToFit / scale,
+                                      height: newH / scaleToFit / scale,
                                     }
                                   : a
                               )
@@ -2243,10 +2244,10 @@ export default function RoomDesigner() {
                                 a.id === aisle.id
                                   ? {
                                       ...a,
-                                      x: (sx - offsetX + deltaX) / scaleToFit,
-                                      y: (sy - offsetY + deltaY) / scaleToFit,
-                                      width: newW / scaleToFit,
-                                      height: newH / scaleToFit,
+                                      x: (sx - offsetX + deltaX) / scaleToFit / scale,
+                                      y: (sy - offsetY + deltaY) / scaleToFit / scale,
+                                      width: newW / scaleToFit / scale,
+                                      height: newH / scaleToFit / scale,
                                     }
                                   : a
                               )
