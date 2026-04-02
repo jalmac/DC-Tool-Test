@@ -2068,42 +2068,36 @@ export default function RoomDesigner() {
 
                     {/* Striped pattern overlay (only for striped style) */}
                     {aisleStyle === "striped" && (
-                      <>
-                        {Array.from({ length: Math.ceil(w / 20) }).map((_, i) => (
+                      <Group clipFunc={(ctx) => {
+                        ctx.rect(0, 0, w, h);
+                      }}>
+                        {Array.from({ length: Math.ceil((w + h) / 15) }).map((_, i) => (
                           <Line
                             key={`stripe-${i}`}
                             points={[
-                              i * 20, 0,
-                              i * 20 + h, h
+                              i * 15 - h, 0,
+                              i * 15, h
                             ]}
                             stroke={isHot ? "#ffebee" : "#e3f2fd"}
-                            strokeWidth={10}
-                            opacity={0.6}
+                            strokeWidth={8}
+                            opacity={0.7}
                           />
                         ))}
-                      </>
+                      </Group>
                     )}
 
                     {/* Aisle label with icon (gradient style gets icons) */}
                     {aisleStyle === "gradient" ? (
-                      <Group>
-                        <Text
-                          text={isHot ? "🔥 " : "❄️ "}
-                          x={w / 2 - (text.length * fontSize * 0.35)}
-                          y={h / 2 - fontSize / 2}
-                          fontSize={fontSize}
-                          fill={isHot ? "#b71c1c" : "#0d47a1"}
-                          fontStyle="bold"
-                        />
-                        <Text
-                          text={text}
-                          x={w / 2 - (text.length * fontSize * 0.25)}
-                          y={h / 2 - fontSize / 2}
-                          fontSize={fontSize}
-                          fill={isHot ? "#b71c1c" : "#0d47a1"}
-                          fontStyle="bold"
-                        />
-                      </Group>
+                      <Text
+                        text={isHot ? "🔥 HOT AISLE" : "❄️ COLD AISLE"}
+                        width={w}
+                        height={h}
+                        fontSize={fontSize}
+                        fill={isHot ? "#b71c1c" : "#0d47a1"}
+                        fontStyle="bold"
+                        align="center"
+                        verticalAlign="middle"
+                      />
                     ) : (
                       <Text
                         text={text}
@@ -2144,6 +2138,9 @@ export default function RoomDesigner() {
                               newH / scaleToFit / scale
                             );
                           }}
+                          onDragEnd={() => {
+                            // Prevent handle from snapping back
+                          }}
                         />
                         {/* Bottom-left resize handle */}
                         <Circle
@@ -2180,6 +2177,9 @@ export default function RoomDesigner() {
                               )
                             );
                           }}
+                          onDragEnd={() => {
+                            // Prevent handle from snapping back
+                          }}
                         />
                         {/* Top-right resize handle */}
                         <Circle
@@ -2215,6 +2215,9 @@ export default function RoomDesigner() {
                                   : a
                               )
                             );
+                          }}
+                          onDragEnd={() => {
+                            // Prevent handle from snapping back
                           }}
                         />
                         {/* Top-left resize handle */}
@@ -2254,6 +2257,9 @@ export default function RoomDesigner() {
                                   : a
                               )
                             );
+                          }}
+                          onDragEnd={() => {
+                            // Prevent handle from snapping back
                           }}
                         />
                       </>
