@@ -222,7 +222,8 @@ export default function RoomDesigner() {
       doorFlipped,
       doorHingeRight,
       racks, // Pass existing racks to preserve their properties
-      rackNumberingStartsAtZero ? 0 : 1
+      rackNumberingStartsAtZero ? 0 : 1,
+      rackNumberingRightToLeft
     );
 
     setRacks(packed);
@@ -237,6 +238,7 @@ export default function RoomDesigner() {
     showCableManagers,
     cableManagerPx,
     rackNumberingStartsAtZero,
+    rackNumberingRightToLeft,
     useCustomLayout,
   ]);
 
@@ -982,7 +984,8 @@ export default function RoomDesigner() {
         doorFlipped,
         doorHingeRight,
         [], // Pass empty array to reset all racks to default
-        rackNumberingStartsAtZero ? 0 : 1
+        rackNumberingStartsAtZero ? 0 : 1,
+        rackNumberingRightToLeft
       );
       setRacks(packed);
     }, 0);

@@ -42,19 +42,19 @@ export function autoPackRacks(
   doorFlipped = false,
   doorHingeRight = false,
   existingRacks = [],
-  startingNumber = 1
+  startingNumber = 1,
+  rightToLeft = false
 ) {
-  const results = [];
   const racksPerRow = Math.ceil(numRacks / numRows);
-
-  const ROW_GAP = 48; // consistent with legacy and your previous behavior
-
+  const ROW_GAP = 48;
   const totalHeight = numRows * rackD + (numRows - 1) * ROW_GAP;
   const startY = Math.max((roomH - totalHeight) / 2, 0);
 
   let count = 0;
-  let serverCount = startingNumber - 1; // Track server racks separately for numbering
+  let serverCount = startingNumber - 1;
+  const allRacks = [];
 
+  // First pass: collect all racks
   for (let row = 0; row < numRows; row++) {
     const racksInThisRow =
       row === numRows - 1
@@ -63,71 +63,49 @@ export function autoPackRacks(
 
     const rowWidth =
       racksInThisRow * rackW +
-      (racksInThisRow - 1) *
-        (showCableManagers ? cableManagerPx : 0);
+      (racksInThisRow - 1) * (showCableManagers ? cableManagerPx : 0);
 
     const startX = Math.max((roomW - rowWidth) / 2, 0);
+    const rowRacks = [];
 
     for (let col = 0; col < racksInThisRow; col++) {
-      const x =
-        startX +
-        col *
-          (rackW + (showCableManagers ? cableManagerPx : 0));
+      const x = startX + col * (rackW + (showCableManagers ? cableManagerPx : 0));
       const y = startY + row * (rackD + ROW_GAP);
 
-      // Must be fully inside the polygon
       if (!insidePoly(x, y, rackW, rackD, polygon)) continue;
+      if (doorBlocked(x, y, rackW, rackD, doorSide, door, roomW, roomH, polygon, doorOffset, doorFlipped, doorHingeRight)) continue;
 
-      // Must not block door swing
-      if (
-        doorBlocked(
-          x,
-          y,
-          rackW,
-          rackD,
-          doorSide,
-          door,
-          roomW,
-          roomH,
-          polygon,
-          doorOffset,
-          doorFlipped,
-          doorHingeRight
-        )
-      ) {
-        continue;
-      }
-
-      // Preserve properties from existing rack if available
       const existingRack = existingRacks[count];
       const type = existingRack?.type || "server";
       const rotation = existingRack?.rotation || 0;
 
-      // Only number server racks, cooling racks get blank label
-      let label;
-      if (type === "cooling") {
-        label = "";
-      } else {
-        serverCount++;
-        label = `Rack\n${serverCount}`;
-      }
-
-      results.push({
-        x,
-        y,
-        label,
-        rotation,
-        type,
-        rowIndex: row,
-        columnIndex: col,
-      });
-
+      rowRacks.push({ x, y, type, rotation, rowIndex: row, columnIndex: col });
       count++;
-      if (count === numRacks) return results;
+      if (count === numRacks) break;
     }
+
+    // Number racks in this row
+    const serverIndices = rowRacks.map((r, idx) => (r.type === "server" ? idx : -1)).filter(idx => idx !== -1);
+    const serverNumbers = [];
+    for (let i = 0; i < serverIndices.length; i++) {
+      serverCount++;
+      serverNumbers.push(serverCount);
+    }
+
+    if (rightToLeft) {
+      serverNumbers.reverse();
+    }
+
+    let serverIdx = 0;
+    for (const rack of rowRacks) {
+      const label = rack.type === "cooling" ? "" : `Rack\n${serverNumbers[serverIdx++]}`;
+      allRacks.push({ ...rack, label });
+    }
+
+    if (count === numRacks) break;
   }
 
-  return results;
+  return allRacks;
 }
 
 /**
